@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Gestion Commerciale - Guide d'utilisation
 
 ## 📋 Prérequis
@@ -61,3 +62,7 @@ Pour toute question : contact@entreprise.com
 
 **Version :** 1.0.0  
 **Date :** Février 2025
+=======
+# gestion_commerciale
+Système de Gestion Commerciale - PyQt6 + MySQL
+>>>>>>> c593561443ef53cb66fb2c8aa31ced1e4118131b

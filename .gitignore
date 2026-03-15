@@ -4,20 +4,40 @@ venv/
 # Fichiers sensibles
 .env
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # PyInstaller
 dist/
 build/
 *.spec
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-
 # InnoSetup output
 Output/
 mysetup.exe
 
+# Exécutables et archives volumineuses
+*.exe
+*.rar
+*.zip
+*.7z
+
+# Documentation volumineuse
+documentation/Livrables/
+documentation/Livrables.rar
+
 # IDE
 .vscode/
 .idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
