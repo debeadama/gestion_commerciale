@@ -1,68 +1,118 @@
-<<<<<<< HEAD
-# Gestion Commerciale - Guide d'utilisation
+# SGC — Système de Gestion Commerciale
 
-## 📋 Prérequis
-
-Avant de lancer l'application, assurez-vous que :
-
-1. **MySQL 8.0+** est installé et en cours d'exécution
-2. La base de données `gestion_commerciale` a été créée
+Application de gestion commerciale développée avec Python 3.14 / PyQt6 / MySQL.
 
 ---
 
-## 🚀 Installation de la base de données
+## Prérequis
 
-### Étape 1 : Créer la base de données
+- Windows 10/11 64 bits
+- MySQL Server 5.7 ou 8.0
+- Python 3.14 (pour le développement uniquement)
 
-Ouvrez MySQL et exécutez :
+---
 
-```sql
-CREATE DATABASE gestion_commerciale CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+## Installation sur une nouvelle machine
+
+### 1. Installer MySQL Server
+
+Téléchargez et installez MySQL depuis : https://dev.mysql.com/downloads/installer/
+
+Notez le mot de passe `root` créé pendant l'installation.
+
+### 2. Lancer l'installateur
+
+Exécutez `mysetup.exe` en tant qu'administrateur et suivez les étapes.
+
+A la fin de l'installation, cochez **"Installer la base de données MySQL"** puis cliquez sur **Terminer**.
+
+Une fenêtre s'ouvre et demande :
+
+```
+Entrez le mot de passe MySQL root :
 ```
 
-### Étape 2 : Importer le schéma
+Saisissez votre mot de passe. Le script crée automatiquement la base de données, importe les tables et génère le fichier `.env` dans le dossier d'installation.
 
-Le fichier `schema.sql` contient toutes les tables nécessaires. Importez-le dans MySQL.
+### 3. Lancer l'application
 
----
-
-## ⚙️ Configuration
-
-1. Ouvrez le fichier `.env` dans le dossier d'installation
-2. Modifiez les paramètres de connexion MySQL :
-   ```
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_NAME=gestion_commerciale
-   DB_USER=root
-   DB_PASSWORD=votre_mot_de_passe
-   ```
-3. Personnalisez les informations de votre entreprise
+Double-cliquez sur le raccourci **SGC** créé sur le Bureau.
 
 ---
 
-## 🔐 Premier utilisateur
+## Configuration manuelle du fichier .env
 
-Après avoir créé la base de données, insérez un utilisateur administrateur :
+Le fichier `.env` est généré automatiquement lors de l'installation. Si nécessaire, vous pouvez le modifier manuellement dans :
 
-```sql
-INSERT INTO users (username, password_hash, role, email, is_active)
-VALUES ('admin', 'hash_bcrypt_du_mot_de_passe', 'admin', 'admin@entreprise.com', TRUE);
+```
+C:\Program Files\SGC\.env
 ```
 
-**Mot de passe par défaut :** `admin123` (à changer immédiatement)
+Contenu du fichier :
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=gestion_commerciale
+DB_USER=root
+DB_PASSWORD=votre_mot_de_passe
+```
 
 ---
 
-## 📞 Support
+## Structure du projet
 
-Pour toute question : contact@entreprise.com
+```
+gestion_commerciale/
+├── controllers/        # Logique métier (auth, clients, produits, ventes)
+├── models/             # Accès base de données
+├── views/              # Interfaces graphiques PyQt6
+├── database/           # Scripts SQL (schema, seed_data, add_indexes)
+├── utils/              # Utilitaires (PDF, cache, pagination)
+├── tests/              # Tests unitaires (313 tests, couverture 99%)
+├── main.py             # Point d'entrée
+├── install_db.bat      # Script d'installation de la base de données
+└── .env                # Configuration de connexion (non versionné)
+```
 
 ---
 
-**Version :** 1.0.0  
-**Date :** Février 2025
-=======
-# gestion_commerciale
-Système de Gestion Commerciale - PyQt6 + MySQL
->>>>>>> c593561443ef53cb66fb2c8aa31ced1e4118131b
+## Lancer les tests
+
+```bash
+python -m pytest tests/ --cov=controllers --cov=models --cov-report=term-missing
+```
+
+Résultats actuels : **313 tests passés — couverture 99%**
+
+---
+
+## Technologies utilisées
+
+- Python 3.14
+- PyQt6 — interfaces graphiques
+- MySQL 8.0 — base de données
+- bcrypt — hachage des mots de passe
+- ReportLab — génération de PDF
+- PyInstaller — création de l'exécutable
+- InnoSetup — création de l'installateur Windows
+
+---
+
+## Déploiement
+
+L'exécutable et l'installateur sont générés avec :
+
+```bash
+# Créer l'exécutable
+pyinstaller main.spec
+
+# Créer l'installateur (via InnoSetup)
+# Compiler le fichier setup_SGC.iss
+```
+
+L'installateur final se trouve dans : `C:\gestion_commerciale\mysetup.exe`
+
+---
+
+Version 1.0 — Février 2026
