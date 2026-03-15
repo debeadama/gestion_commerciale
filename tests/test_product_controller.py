@@ -11,19 +11,23 @@ Pour exécuter :
     python -m pytest tests/test_product_controller.py -v
 """
 
+from controllers.product_controller import ProductController  # noqa: E402
+from unittest.mock import patch, MagicMock  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch, MagicMock
-from controllers.product_controller import ProductController
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerGetAll(unittest.TestCase):
 
@@ -43,16 +47,17 @@ class TestProductControllerGetAll(unittest.TestCase):
         self.assertEqual(len(result), 1)
         mock_get.assert_called_once_with('HP', 1)
 
-    @patch('controllers.product_controller.ProductModel.get_all', return_value=None)
+    @patch('controllers.product_controller.ProductModel.get_all',
+           return_value=None)
     def test_get_all_retourne_liste_vide_si_none(self, mock_get):
         """TC-PGA-03 : get_all() retourne [] si le modèle retourne None."""
         result = ProductController.get_all()
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerGetById(unittest.TestCase):
 
@@ -64,16 +69,17 @@ class TestProductControllerGetById(unittest.TestCase):
         self.assertEqual(result['nom'], 'HP Laptop')
         mock_get.assert_called_once_with(1)
 
-    @patch('controllers.product_controller.ProductModel.get_by_id', return_value=None)
+    @patch('controllers.product_controller.ProductModel.get_by_id',
+           return_value=None)
     def test_get_by_id_inexistant(self, mock_get):
         """TC-PGB-02 : get_by_id() retourne None si inexistant."""
         result = ProductController.get_by_id(999)
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_categories() — cache hit / miss
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerGetCategories(unittest.TestCase):
 
@@ -99,16 +105,17 @@ class TestProductControllerGetCategories(unittest.TestCase):
     @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.get_categories',
            return_value=None)
-    def test_get_categories_retourne_liste_vide_si_none(self, mock_model, mock_cache):
+    def test_get_categories_retourne_liste_vide_si_none(
+            self, mock_model, mock_cache):
         """TC-PGC-03 : get_categories() retourne [] si modèle retourne None."""
         mock_cache.get.return_value = None
         result = ProductController.get_categories()
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_low_stock() — cache hit / miss
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerGetLowStock(unittest.TestCase):
 
@@ -131,9 +138,9 @@ class TestProductControllerGetLowStock(unittest.TestCase):
         mock_cache.set.assert_called_once()
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_movements()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerGetMovements(unittest.TestCase):
 
@@ -145,16 +152,17 @@ class TestProductControllerGetMovements(unittest.TestCase):
         self.assertEqual(len(result), 1)
         mock_get.assert_called_once_with(1)
 
-    @patch('controllers.product_controller.ProductModel.get_movements', return_value=None)
+    @patch('controllers.product_controller.ProductModel.get_movements',
+           return_value=None)
     def test_get_movements_retourne_liste_vide_si_none(self, mock_get):
         """TC-PGM-02 : get_movements() retourne [] si None."""
         result = ProductController.get_movements(99)
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerCreate(unittest.TestCase):
 
@@ -166,21 +174,25 @@ class TestProductControllerCreate(unittest.TestCase):
 
     def test_prix_negatif_retourne_erreur(self):
         """TC-PC-02 : prix négatif retourne (False, message)."""
-        ok, msg = ProductController.create({'nom': 'Câble USB', 'prix_vente': -500})
+        ok, msg = ProductController.create(
+            {'nom': 'Câble USB', 'prix_vente': -500})
         self.assertFalse(ok)
         self.assertIn('prix', msg.lower())
 
     def test_prix_invalide_retourne_erreur(self):
         """TC-PC-03 : prix non numérique retourne (False, message)."""
-        ok, msg = ProductController.create({'nom': 'Câble USB', 'prix_vente': 'abc'})
+        ok, msg = ProductController.create(
+            {'nom': 'Câble USB', 'prix_vente': 'abc'})
         self.assertFalse(ok)
         self.assertIn('prix', msg.lower())
 
     @patch('controllers.product_controller.app_cache')
-    @patch('controllers.product_controller.ProductModel.create', return_value=5)
+    @patch('controllers.product_controller.ProductModel.create',
+           return_value=5)
     def test_creation_reussie(self, mock_create, mock_cache):
         """TC-PC-04 : create() valide retourne (True, id)."""
-        ok, pid = ProductController.create({'nom': 'Samsung A55', 'prix_vente': 185000})
+        ok, pid = ProductController.create(
+            {'nom': 'Samsung A55', 'prix_vente': 185000})
         self.assertTrue(ok)
         self.assertEqual(pid, 5)
         mock_cache.invalidate.assert_called_once()
@@ -190,14 +202,15 @@ class TestProductControllerCreate(unittest.TestCase):
            side_effect=Exception("Duplicate entry"))
     def test_exception_bdd_retourne_erreur(self, mock_create, mock_cache):
         """TC-PC-05 : exception BDD retourne (False, message)."""
-        ok, msg = ProductController.create({'nom': 'Chargeur', 'prix_vente': 12000})
+        ok, msg = ProductController.create(
+            {'nom': 'Chargeur', 'prix_vente': 12000})
         self.assertFalse(ok)
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerUpdate(unittest.TestCase):
 
@@ -211,7 +224,8 @@ class TestProductControllerUpdate(unittest.TestCase):
     @patch('controllers.product_controller.ProductModel.update')
     def test_update_reussie(self, mock_update, mock_cache):
         """TC-PU-02 : update() valide retourne (True, message)."""
-        ok, msg = ProductController.update(1, {'nom': 'HP Laptop Pro', 'prix_vente': 400000})
+        ok, msg = ProductController.update(
+            1, {'nom': 'HP Laptop Pro', 'prix_vente': 400000})
         self.assertTrue(ok)
         mock_update.assert_called_once()
         mock_cache.invalidate.assert_called_once()
@@ -221,21 +235,23 @@ class TestProductControllerUpdate(unittest.TestCase):
            side_effect=Exception("Erreur SQL"))
     def test_update_exception_retourne_erreur(self, mock_update, mock_cache):
         """TC-PU-03 : exception dans update() retourne (False, message)."""
-        ok, msg = ProductController.update(1, {'nom': 'HP Laptop', 'prix_vente': 350000})
+        ok, msg = ProductController.update(
+            1, {'nom': 'HP Laptop', 'prix_vente': 350000})
         self.assertFalse(ok)
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerDelete(unittest.TestCase):
 
     @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.delete')
     def test_suppression_reussie(self, mock_delete, mock_cache):
-        """TC-PD-01 : delete() retourne (True, message) et invalide le cache."""
+        """TC-PD-01 : delete() retourne (True, message)
+        et invalide le cache."""
         ok, msg = ProductController.delete(1)
         self.assertTrue(ok)
         mock_delete.assert_called_once_with(1)
@@ -260,9 +276,9 @@ class TestProductControllerDelete(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST add_stock_movement()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerStockMovement(unittest.TestCase):
 
@@ -278,7 +294,8 @@ class TestProductControllerStockMovement(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn('quantite', msg.lower())
 
-    @patch('controllers.product_controller.ProductModel.get_by_id', return_value=None)
+    @patch('controllers.product_controller.ProductModel.get_by_id',
+           return_value=None)
     def test_produit_introuvable_retourne_erreur(self, mock_get):
         """TC-SM-03 : produit inexistant retourne (False, 'introuvable')."""
         ok, msg = ProductController.add_stock_movement(999, 'entree', 10)
@@ -297,9 +314,11 @@ class TestProductControllerStockMovement(unittest.TestCase):
     @patch('controllers.product_controller.ProductModel.apply_stock_movement')
     @patch('controllers.product_controller.ProductModel.get_by_id',
            return_value={'id': 1, 'nom': 'Câble USB', 'stock_actuel': 5})
-    def test_sortie_valide_calcule_nouveau_stock(self, mock_get, mock_apply, mock_cache):
+    def test_sortie_valide_calcule_nouveau_stock(
+            self, mock_get, mock_apply, mock_cache):
         """TC-SM-05 : sortie 3/5 → nouveau stock = 2."""
-        ok, msg = ProductController.add_stock_movement(1, 'sortie', 3, user_id=1)
+        ok, msg = ProductController.add_stock_movement(
+            1, 'sortie', 3, user_id=1)
         self.assertTrue(ok)
         self.assertIn('2', msg)
         self.assertEqual(mock_apply.call_args[0][5], 2)
@@ -308,9 +327,11 @@ class TestProductControllerStockMovement(unittest.TestCase):
     @patch('controllers.product_controller.ProductModel.apply_stock_movement')
     @patch('controllers.product_controller.ProductModel.get_by_id',
            return_value={'id': 1, 'nom': 'Câble USB', 'stock_actuel': 5})
-    def test_entree_calcule_nouveau_stock(self, mock_get, mock_apply, mock_cache):
+    def test_entree_calcule_nouveau_stock(
+            self, mock_get, mock_apply, mock_cache):
         """TC-SM-06 : entrée 10 + stock 5 → nouveau stock = 15."""
-        ok, msg = ProductController.add_stock_movement(1, 'entree', 10, user_id=1)
+        ok, msg = ProductController.add_stock_movement(
+            1, 'entree', 10, user_id=1)
         self.assertTrue(ok)
         self.assertIn('15', msg)
         self.assertEqual(mock_apply.call_args[0][5], 15)
@@ -320,7 +341,8 @@ class TestProductControllerStockMovement(unittest.TestCase):
            side_effect=Exception("Erreur SQL"))
     @patch('controllers.product_controller.ProductModel.get_by_id',
            return_value={'id': 1, 'nom': 'Câble USB', 'stock_actuel': 10})
-    def test_exception_apply_retourne_erreur(self, mock_get, mock_apply, mock_cache):
+    def test_exception_apply_retourne_erreur(
+            self, mock_get, mock_apply, mock_cache):
         """TC-SM-07 : exception dans apply retourne (False, message)."""
         ok, msg = ProductController.add_stock_movement(1, 'entree', 5)
         self.assertFalse(ok)
@@ -329,26 +351,29 @@ class TestProductControllerStockMovement(unittest.TestCase):
     @patch('controllers.product_controller.ProductModel.apply_stock_movement')
     @patch('controllers.product_controller.ProductModel.get_by_id',
            return_value={'id': 1, 'nom': 'Câble USB', 'stock_actuel': 5})
-    def test_cache_invalide_apres_succes(self, mock_get, mock_apply, mock_cache):
+    def test_cache_invalide_apres_succes(
+            self, mock_get, mock_apply, mock_cache):
         """TC-SM-08 : cache invalidé après mouvement réussi."""
         ProductController.add_stock_movement(1, 'entree', 5)
         mock_cache.invalidate.assert_called_once()
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create_category()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerCreateCategory(unittest.TestCase):
 
     def test_nom_vide_retourne_erreur(self):
-        """TC-CAT-01 : create_category() avec nom vide retourne (False, message)."""
+        """TC-CAT-01 : create_category() nom vide
+        retourne (False, message)."""
         ok, msg = ProductController.create_category('')
         self.assertFalse(ok)
         self.assertIn('nom', msg.lower())
 
     def test_nom_espaces_retourne_erreur(self):
-        """TC-CAT-02 : create_category() avec espaces retourne (False, message)."""
+        """TC-CAT-02 : create_category() espaces
+        retourne (False, message)."""
         ok, msg = ProductController.create_category('   ')
         self.assertFalse(ok)
         self.assertIn('nom', msg.lower())
@@ -356,7 +381,8 @@ class TestProductControllerCreateCategory(unittest.TestCase):
     @patch('controllers.product_controller.ProductModel.find_category_by_name',
            return_value={'id': 1, 'nom': 'Informatique'})
     def test_categorie_deja_existante_retourne_erreur(self, mock_find):
-        """TC-CAT-03 : catégorie existante retourne (False, message 'existe')."""
+        """TC-CAT-03 : categorie existante
+        retourne (False, message 'existe')."""
         ok, msg = ProductController.create_category('Informatique')
         self.assertFalse(ok)
         self.assertIn('existe', msg.lower())
@@ -367,7 +393,8 @@ class TestProductControllerCreateCategory(unittest.TestCase):
            return_value=7)
     def test_creation_categorie_reussie(self, mock_create, mock_find):
         """TC-CAT-04 : create_category() valide retourne (True, id)."""
-        ok, cid = ProductController.create_category('Électronique', 'Appareils électroniques')
+        ok, cid = ProductController.create_category(
+            'Électronique', 'Appareils électroniques')
         self.assertTrue(ok)
         self.assertEqual(cid, 7)
 
@@ -382,9 +409,9 @@ class TestProductControllerCreateCategory(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete_category()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerDeleteCategory(unittest.TestCase):
 
@@ -412,9 +439,9 @@ class TestProductControllerDeleteCategory(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_dashboard_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductControllerDashboard(unittest.TestCase):
 
@@ -427,9 +454,9 @@ class TestProductControllerDashboard(unittest.TestCase):
         mock_stats.assert_called_once()
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

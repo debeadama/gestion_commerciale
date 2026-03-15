@@ -24,20 +24,24 @@ Pour exécuter :
     python -m pytest tests/test_model_user.py -v
 """
 
+from models.user import UserModel  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 import unittest
 import sys
 import os
 import bcrypt
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch
-from models.user import UserModel
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelGetAll(unittest.TestCase):
 
@@ -49,7 +53,7 @@ class TestUserModelGetAll(unittest.TestCase):
         et retourner la liste des utilisateurs.
         """
         mock_db.execute_query.return_value = [
-            {'id': 1, 'username': 'admin',    'role': 'admin'},
+            {'id': 1, 'username': 'admin', 'role': 'admin'},
             {'id': 2, 'username': 'manager1', 'role': 'manager'},
             {'id': 3, 'username': 'vendeur1', 'role': 'vendeur'},
         ]
@@ -75,9 +79,9 @@ class TestUserModelGetAll(unittest.TestCase):
         self.assertEqual(len(result), 0)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelGetById(unittest.TestCase):
 
@@ -112,9 +116,9 @@ class TestUserModelGetById(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_username()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelGetByUsername(unittest.TestCase):
 
@@ -154,9 +158,9 @@ class TestUserModelGetByUsername(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST verify_password()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelVerifyPassword(unittest.TestCase):
     """
@@ -197,14 +201,15 @@ class TestUserModelVerifyPassword(unittest.TestCase):
         TM-US-VP-03 : verify_password() doit retourner False
         sans lever d'exception si le hash est malformé.
         """
-        result = UserModel.verify_password('monmdp', 'hash_invalide_pas_bcrypt')
+        result = UserModel.verify_password(
+            'monmdp', 'hash_invalide_pas_bcrypt')
 
         self.assertFalse(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST find_by_username()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelFindByUsername(unittest.TestCase):
 
@@ -266,9 +271,9 @@ class TestUserModelFindByUsername(unittest.TestCase):
         self.assertEqual(params, ('admin',))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelCreate(unittest.TestCase):
 
@@ -301,7 +306,12 @@ class TestUserModelCreate(unittest.TestCase):
         """
         mock_db.execute_update.return_value = 6
 
-        UserModel.create('user3', '$2b$12$h', 'vendeur', 'User Trois', 'u3@mail.ci')
+        UserModel.create(
+            'user3',
+            '$2b$12$h',
+            'vendeur',
+            'User Trois',
+            'u3@mail.ci')
 
         call_args = mock_db.execute_update.call_args[0]
         params = call_args[1]
@@ -312,9 +322,9 @@ class TestUserModelCreate(unittest.TestCase):
         self.assertEqual(params[4], 'vendeur')        # role
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelUpdate(unittest.TestCase):
 
@@ -347,9 +357,9 @@ class TestUserModelUpdate(unittest.TestCase):
         self.assertEqual(params[-1], 7)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST change_password()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelChangePassword(unittest.TestCase):
 
@@ -380,9 +390,9 @@ class TestUserModelChangePassword(unittest.TestCase):
         self.assertEqual(params[1], 4)               # user_id
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelDelete(unittest.TestCase):
 
@@ -412,9 +422,9 @@ class TestUserModelDelete(unittest.TestCase):
         self.assertEqual(params[0], 8)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserModelGetStats(unittest.TestCase):
 
@@ -449,13 +459,13 @@ class TestUserModelGetStats(unittest.TestCase):
         self.assertEqual(result, {})
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     loader = unittest.TestLoader()
-    suite  = unittest.TestSuite()
+    suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestUserModelGetAll))
     suite.addTests(loader.loadTestsFromTestCase(TestUserModelGetById))
     suite.addTests(loader.loadTestsFromTestCase(TestUserModelGetByUsername))

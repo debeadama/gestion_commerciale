@@ -4,7 +4,8 @@ tests/test_user_controller.py
 Tests unitaires de UserController.
 
 Méthodes testées :
-  - create()          : username existant, password trop court, succès, exception
+  - create()  : username existant, password trop court,
+    succes, exception
   - update()          : username déjà pris, succès, exception
   - change_password() : password trop court, succès, exception
   - delete()          : suppression de son propre compte, succès, exception
@@ -18,19 +19,23 @@ Pour exécuter :
     python -m pytest tests/test_user_controller.py -v
 """
 
+from controllers.user_controller import UserController  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch
-from controllers.user_controller import UserController
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserControllerCreate(unittest.TestCase):
     """Tests de UserController.create()."""
@@ -89,7 +94,8 @@ class TestUserControllerCreate(unittest.TestCase):
         # Le mot de passe transmis au modèle doit être un hash bcrypt
         args = mock_create.call_args[0]
         hashed = args[1]
-        self.assertTrue(hashed.startswith('$2b$'), "Le mot de passe doit être haché en bcrypt")
+        self.assertTrue(hashed.startswith('$2b$'),
+                        "Le mot de passe doit être haché en bcrypt")
 
     # ── TC-UC-04 ─────────────────────────────────────────────
     @patch('controllers.user_controller.UserModel.create',
@@ -117,7 +123,8 @@ class TestUserControllerCreate(unittest.TestCase):
         TC-UC-05 : create() avec un password de exactement 6 caractères
         doit passer la validation (limite basse acceptée).
         """
-        with patch('controllers.user_controller.UserModel.create', return_value=6):
+        patch_path = 'controllers.user_controller.UserModel.create'
+        with patch(patch_path, return_value=6):
             ok, uid = UserController.create(
                 username='user2', password='abc123',
                 role='vendeur'
@@ -127,9 +134,9 @@ class TestUserControllerCreate(unittest.TestCase):
         self.assertEqual(uid, 6)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserControllerUpdate(unittest.TestCase):
     """Tests de UserController.update()."""
@@ -187,9 +194,9 @@ class TestUserControllerUpdate(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST change_password()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserControllerChangePassword(unittest.TestCase):
     """Tests de UserController.change_password()."""
@@ -221,7 +228,9 @@ class TestUserControllerChangePassword(unittest.TestCase):
 
         # Le hash transmis doit être un hash bcrypt
         hashed = mock_change.call_args[0][1]
-        self.assertTrue(hashed.startswith('$2b$'), "Le nouveau mot de passe doit être haché")
+        self.assertTrue(
+            hashed.startswith('$2b$'),
+            "Le nouveau mot de passe doit être haché")
 
     # ── TC-CP-03 ─────────────────────────────────────────────
     @patch('controllers.user_controller.UserModel.change_password',
@@ -239,9 +248,9 @@ class TestUserControllerChangePassword(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestUserControllerDelete(unittest.TestCase):
     """Tests de UserController.delete()."""
@@ -293,16 +302,17 @@ class TestUserControllerDelete(unittest.TestCase):
         mock_delete.assert_called_once_with(7)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     loader = unittest.TestLoader()
-    suite  = unittest.TestSuite()
+    suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestUserControllerCreate))
     suite.addTests(loader.loadTestsFromTestCase(TestUserControllerUpdate))
-    suite.addTests(loader.loadTestsFromTestCase(TestUserControllerChangePassword))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestUserControllerChangePassword))
     suite.addTests(loader.loadTestsFromTestCase(TestUserControllerDelete))
 
     runner = unittest.TextTestRunner(verbosity=2)

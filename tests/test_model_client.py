@@ -10,19 +10,23 @@ Pour exécuter :
     python -m pytest tests/test_model_client.py -v
 """
 
+from models.client import ClientModel  # noqa: E402
+from unittest.mock import patch, call  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch, call
-from models.client import ClientModel
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelGetAll(unittest.TestCase):
 
@@ -44,9 +48,9 @@ class TestClientModelGetAll(unittest.TestCase):
         self.assertIn('%KOUASSI%', params)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelGetById(unittest.TestCase):
 
@@ -66,9 +70,9 @@ class TestClientModelGetById(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST find_duplicate()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelFindDuplicate(unittest.TestCase):
 
@@ -87,9 +91,9 @@ class TestClientModelFindDuplicate(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelGetStats(unittest.TestCase):
 
@@ -113,9 +117,9 @@ class TestClientModelGetStats(unittest.TestCase):
         self.assertEqual(result, {})
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_export_data()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelGetExportData(unittest.TestCase):
 
@@ -123,7 +127,10 @@ class TestClientModelGetExportData(unittest.TestCase):
     def test_get_export_data_retourne_liste(self, mock_db):
         """TC-CME-01 : get_export_data() retourne la liste enrichie."""
         mock_db.execute_query.return_value = [
-            {'nom': 'KOUASSI', 'prenom': 'Jean', 'ca_total': 500000, 'nb_achats': 3}
+            {
+                'nom': 'KOUASSI', 'prenom': 'Jean',
+                'ca_total': 500000, 'nb_achats': 3,
+            }
         ]
         result = ClientModel.get_export_data()
         self.assertEqual(len(result), 1)
@@ -147,9 +154,9 @@ class TestClientModelGetExportData(unittest.TestCase):
         self.assertIn('nb_achats', call_sql.lower())
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelCreate(unittest.TestCase):
 
@@ -173,9 +180,9 @@ class TestClientModelCreate(unittest.TestCase):
         self.assertIsNone(params[3])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelUpdate(unittest.TestCase):
 
@@ -190,9 +197,9 @@ class TestClientModelUpdate(unittest.TestCase):
         self.assertEqual(params[-1], 1)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelDelete(unittest.TestCase):
 
@@ -223,9 +230,9 @@ class TestClientModelDelete(unittest.TestCase):
         self.assertEqual(params, (42,))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_purchase_history()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelPurchaseHistory(unittest.TestCase):
 
@@ -233,8 +240,10 @@ class TestClientModelPurchaseHistory(unittest.TestCase):
     def test_get_purchase_history_retourne_liste(self, mock_db):
         """TC-CMH-01 : get_purchase_history() retourne les achats du client."""
         mock_db.execute_query.return_value = [
-            {'id': 1, 'numero_facture': 'FAC-20240115-0001', 'statut': 'payee'},
-            {'id': 2, 'numero_facture': 'FAC-20240120-0002', 'statut': 'partielle'},
+            {'id': 1, 'numero_facture': 'FAC-20240115-0001',
+             'statut': 'payee'},
+            {'id': 2, 'numero_facture': 'FAC-20240120-0002',
+             'statut': 'partielle'},
         ]
         result = ClientModel.get_purchase_history(1)
         self.assertEqual(len(result), 2)
@@ -258,9 +267,9 @@ class TestClientModelPurchaseHistory(unittest.TestCase):
         self.assertIn('ORDER BY', call_sql)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST count()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientModelCount(unittest.TestCase):
 
@@ -279,9 +288,9 @@ class TestClientModelCount(unittest.TestCase):
         self.assertEqual(result, 0)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

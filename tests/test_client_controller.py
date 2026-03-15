@@ -9,46 +9,53 @@ Pour exécuter :
     python -m pytest tests/test_client_controller.py -v
 """
 
+from controllers.client_controller import ClientController  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch
-from controllers.client_controller import ClientController
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerGetAll(unittest.TestCase):
 
-    @patch('controllers.client_controller.ClientModel.get_all', return_value=[{'id': 1}])
+    @patch('controllers.client_controller.ClientModel.get_all',
+           return_value=[{'id': 1}])
     def test_get_all_sans_filtre(self, mock_get):
         """TC-CGA-01 : get_all() sans filtre retourne la liste du modèle."""
         result = ClientController.get_all()
         self.assertEqual(result, [{'id': 1}])
         mock_get.assert_called_once_with(None)
 
-    @patch('controllers.client_controller.ClientModel.get_all', return_value=[{'id': 2}])
+    @patch('controllers.client_controller.ClientModel.get_all',
+           return_value=[{'id': 2}])
     def test_get_all_avec_recherche(self, mock_get):
         """TC-CGA-02 : get_all() avec recherche transmet le terme au modèle."""
         result = ClientController.get_all(search='KOUASSI')
         self.assertEqual(result, [{'id': 2}])
         mock_get.assert_called_once_with('KOUASSI')
 
-    @patch('controllers.client_controller.ClientModel.get_all', return_value=None)
+    @patch('controllers.client_controller.ClientModel.get_all',
+           return_value=None)
     def test_get_all_retourne_liste_vide_si_none(self, mock_get):
         """TC-CGA-03 : get_all() retourne [] si le modèle retourne None."""
         result = ClientController.get_all()
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerGetById(unittest.TestCase):
 
@@ -60,16 +67,17 @@ class TestClientControllerGetById(unittest.TestCase):
         self.assertEqual(result['nom'], 'KOUASSI')
         mock_get.assert_called_once_with(1)
 
-    @patch('controllers.client_controller.ClientModel.get_by_id', return_value=None)
+    @patch('controllers.client_controller.ClientModel.get_by_id',
+           return_value=None)
     def test_get_by_id_inexistant(self, mock_get):
         """TC-CGB-02 : get_by_id() retourne None si client inexistant."""
         result = ClientController.get_by_id(999)
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_purchase_history()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerPurchaseHistory(unittest.TestCase):
 
@@ -89,9 +97,9 @@ class TestClientControllerPurchaseHistory(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerGetStats(unittest.TestCase):
 
@@ -104,9 +112,9 @@ class TestClientControllerGetStats(unittest.TestCase):
         mock_stats.assert_called_once_with(1)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerCreate(unittest.TestCase):
 
@@ -137,16 +145,20 @@ class TestClientControllerCreate(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn('existe', msg.lower())
 
-    @patch('controllers.client_controller.ClientModel.find_duplicate', return_value=None)
+    @patch('controllers.client_controller.ClientModel.find_duplicate',
+           return_value=None)
     @patch('controllers.client_controller.ClientModel.create', return_value=11)
     def test_creation_sans_telephone_reussit(self, mock_create, mock_dup):
-        """TC-CC-05 : create() sans téléphone réussit sans appeler find_duplicate."""
-        ok, cid = ClientController.create({'nom': 'BAMBA', 'prenom': 'Awa', 'telephone': ''})
+        """TC-CC-05 : create() sans telephone reussit
+        sans appeler find_duplicate."""
+        ok, cid = ClientController.create(
+            {'nom': 'BAMBA', 'prenom': 'Awa', 'telephone': ''})
         self.assertTrue(ok)
         self.assertEqual(cid, 11)
         mock_dup.assert_not_called()
 
-    @patch('controllers.client_controller.ClientModel.find_duplicate', return_value=None)
+    @patch('controllers.client_controller.ClientModel.find_duplicate',
+           return_value=None)
     @patch('controllers.client_controller.ClientModel.create', return_value=12)
     def test_creation_complete_reussit(self, mock_create, mock_dup):
         """TC-CC-06 : create() complet retourne (True, id)."""
@@ -155,7 +167,8 @@ class TestClientControllerCreate(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(cid, 12)
 
-    @patch('controllers.client_controller.ClientModel.find_duplicate', return_value=None)
+    @patch('controllers.client_controller.ClientModel.find_duplicate',
+           return_value=None)
     @patch('controllers.client_controller.ClientModel.create',
            side_effect=Exception("Erreur SQL"))
     def test_exception_bdd_retourne_erreur(self, mock_create, mock_dup):
@@ -166,9 +179,9 @@ class TestClientControllerCreate(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerUpdate(unittest.TestCase):
 
@@ -197,14 +210,15 @@ class TestClientControllerUpdate(unittest.TestCase):
            side_effect=Exception("Connexion perdue"))
     def test_update_exception_retourne_erreur(self, mock_update):
         """TC-CU-04 : exception dans update() retourne (False, message)."""
-        ok, msg = ClientController.update(1, {'nom': 'KOUASSI', 'prenom': 'Jean'})
+        ok, msg = ClientController.update(
+            1, {'nom': 'KOUASSI', 'prenom': 'Jean'})
         self.assertFalse(ok)
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerDelete(unittest.TestCase):
 
@@ -238,9 +252,9 @@ class TestClientControllerDelete(unittest.TestCase):
         mock_delete.assert_called_once_with(42)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_export_data()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestClientControllerExport(unittest.TestCase):
 
@@ -254,9 +268,9 @@ class TestClientControllerExport(unittest.TestCase):
         mock_export.assert_called_once()
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -22,19 +22,23 @@ Pour exécuter :
     python -m pytest tests/test_model_product.py -v
 """
 
+from models.product import ProductModel  # noqa: E402
+from unittest.mock import patch, call  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch, call
-from models.product import ProductModel
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelGetAll(unittest.TestCase):
 
@@ -86,9 +90,9 @@ class TestProductModelGetAll(unittest.TestCase):
         self.assertIn(2, params)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelGetById(unittest.TestCase):
 
@@ -122,9 +126,9 @@ class TestProductModelGetById(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_low_stock()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelGetLowStock(unittest.TestCase):
 
@@ -137,7 +141,7 @@ class TestProductModelGetLowStock(unittest.TestCase):
         """
         mock_db.execute_query.return_value = [
             {'id': 3, 'nom': 'Câble USB', 'stock_actuel': 2, 'stock_min': 5},
-            {'id': 7, 'nom': 'Chargeur',  'stock_actuel': 0, 'stock_min': 3},
+            {'id': 7, 'nom': 'Chargeur', 'stock_actuel': 0, 'stock_min': 3},
         ]
 
         result = ProductModel.get_low_stock()
@@ -147,9 +151,9 @@ class TestProductModelGetLowStock(unittest.TestCase):
             self.assertLessEqual(p['stock_actuel'], p['stock_min'])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST apply_stock_movement()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelApplyStockMovement(unittest.TestCase):
 
@@ -187,9 +191,9 @@ class TestProductModelApplyStockMovement(unittest.TestCase):
         self.assertEqual(params[1], 1)    # product_id
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelCreate(unittest.TestCase):
 
@@ -232,9 +236,9 @@ class TestProductModelCreate(unittest.TestCase):
         self.assertIsNone(params[6])   # category_id
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelUpdate(unittest.TestCase):
 
@@ -274,9 +278,9 @@ class TestProductModelUpdate(unittest.TestCase):
         self.assertEqual(params[-1], 42)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelDelete(unittest.TestCase):
 
@@ -287,7 +291,7 @@ class TestProductModelDelete(unittest.TestCase):
         TM-PR-DE-01 : delete() doit supprimer le produit et retourner
         True quand aucune vente ne le référence.
         """
-        mock_db.execute_query.return_value  = {'total': 0}
+        mock_db.execute_query.return_value = {'total': 0}
         mock_db.execute_update.return_value = 1
 
         result = ProductModel.delete(1)
@@ -317,7 +321,7 @@ class TestProductModelDelete(unittest.TestCase):
         TM-PR-DE-03 : delete() doit transmettre l'ID exact
         à db.execute_update().
         """
-        mock_db.execute_query.return_value  = {'total': 0}
+        mock_db.execute_query.return_value = {'total': 0}
         mock_db.execute_update.return_value = 1
 
         ProductModel.delete(9)
@@ -327,9 +331,9 @@ class TestProductModelDelete(unittest.TestCase):
         self.assertEqual(params[0], 9)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update_stock()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelUpdateStock(unittest.TestCase):
 
@@ -350,9 +354,9 @@ class TestProductModelUpdateStock(unittest.TestCase):
         self.assertEqual(params[1], 3)   # product_id
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST count()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelCount(unittest.TestCase):
 
@@ -383,9 +387,9 @@ class TestProductModelCount(unittest.TestCase):
         self.assertEqual(result, 0)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_categories()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelGetCategories(unittest.TestCase):
 
@@ -410,9 +414,9 @@ class TestProductModelGetCategories(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_movements()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelGetMovements(unittest.TestCase):
 
@@ -444,15 +448,16 @@ class TestProductModelGetMovements(unittest.TestCase):
         self.assertIn('produit_id', call_sql)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST find_category_by_name()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelFindCategoryByName(unittest.TestCase):
 
     @patch('models.product.db')
     def test_find_category_existante(self, mock_db):
-        """TC-PMF-01 : find_category_by_name() retourne la catégorie si elle existe."""
+        """TC-PMF-01 : find_category_by_name()
+        retourne la categorie si elle existe."""
         mock_db.execute_query.return_value = {'id': 1}
         result = ProductModel.find_category_by_name('Informatique')
         self.assertEqual(result['id'], 1)
@@ -467,9 +472,9 @@ class TestProductModelFindCategoryByName(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create_category()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelCreateCategory(unittest.TestCase):
 
@@ -492,15 +497,16 @@ class TestProductModelCreateCategory(unittest.TestCase):
         self.assertEqual(params[1], '')
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete_category()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelDeleteCategory(unittest.TestCase):
 
     @patch('models.product.db')
     def test_delete_category_reussit_si_aucun_produit(self, mock_db):
-        """TC-PMDC-01 : delete_category() réussit si aucun produit ne l'utilise."""
+        """TC-PMDC-01 : delete_category() reussit
+        si aucun produit ne l'utilise."""
         mock_db.execute_query.return_value = {'nb': 0}
         mock_db.execute_update.return_value = True
         result = ProductModel.delete_category(1)
@@ -509,7 +515,8 @@ class TestProductModelDeleteCategory(unittest.TestCase):
 
     @patch('models.product.db')
     def test_delete_category_leve_valueerror_si_produits(self, mock_db):
-        """TC-PMDC-02 : delete_category() lève ValueError si produits associés."""
+        """TC-PMDC-02 : delete_category() leve ValueError
+        si produits associes."""
         mock_db.execute_query.return_value = {'nb': 3}
         with self.assertRaises(ValueError) as ctx:
             ProductModel.delete_category(2)
@@ -533,9 +540,9 @@ class TestProductModelDeleteCategory(unittest.TestCase):
         self.assertTrue(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_dashboard_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestProductModelDashboardStats(unittest.TestCase):
 
@@ -565,17 +572,18 @@ class TestProductModelDashboardStats(unittest.TestCase):
         self.assertEqual(result, {})
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     loader = unittest.TestLoader()
-    suite  = unittest.TestSuite()
+    suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelGetAll))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelGetById))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelGetLowStock))
-    suite.addTests(loader.loadTestsFromTestCase(TestProductModelApplyStockMovement))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestProductModelApplyStockMovement))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelCreate))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelUpdate))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelDelete))
@@ -583,10 +591,14 @@ if __name__ == '__main__':
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelCount))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelGetCategories))
     suite.addTests(loader.loadTestsFromTestCase(TestProductModelGetMovements))
-    suite.addTests(loader.loadTestsFromTestCase(TestProductModelFindCategoryByName))
-    suite.addTests(loader.loadTestsFromTestCase(TestProductModelCreateCategory))
-    suite.addTests(loader.loadTestsFromTestCase(TestProductModelDeleteCategory))
-    suite.addTests(loader.loadTestsFromTestCase(TestProductModelDashboardStats))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestProductModelFindCategoryByName))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestProductModelCreateCategory))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestProductModelDeleteCategory))
+    suite.addTests(loader.loadTestsFromTestCase(
+        TestProductModelDashboardStats))
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

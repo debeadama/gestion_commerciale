@@ -18,19 +18,22 @@ Pour exécuter :
     python -m pytest tests/test_category_controller.py -v
 """
 
+from controllers.category_controller import CategoryController  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch
-from controllers.category_controller import CategoryController
 
-
-# ══════════════════════════════════════════════════════════════
 # TEST get_all() — cache
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryControllerGetAll(unittest.TestCase):
 
@@ -46,7 +49,10 @@ class TestCategoryControllerGetAll(unittest.TestCase):
             {'id': 2, 'nom': 'Informatique'},
         ]
 
-        with patch('controllers.category_controller.CategoryModel.get_all') as mock_model:
+        patch_path = (
+            'controllers.category_controller.CategoryModel.get_all'
+        )
+        with patch(patch_path) as mock_model:
             result = CategoryController.get_all()
 
         self.assertEqual(len(result), 2)
@@ -56,7 +62,8 @@ class TestCategoryControllerGetAll(unittest.TestCase):
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.get_all',
            return_value=[{'id': 1, 'nom': 'Téléphonie'}])
-    def test_cache_miss_interroge_base_et_met_en_cache(self, mock_model, mock_cache):
+    def test_cache_miss_interroge_base_et_met_en_cache(
+            self, mock_model, mock_cache):
         """
         TC-CC-GA-02 : get_all() avec cache froid doit appeler
         CategoryModel.get_all() et stocker le résultat en cache.
@@ -70,9 +77,9 @@ class TestCategoryControllerGetAll(unittest.TestCase):
         self.assertEqual(len(result), 1)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryControllerCreate(unittest.TestCase):
 
@@ -113,26 +120,33 @@ class TestCategoryControllerCreate(unittest.TestCase):
 
     # ── TC-CC-CR-04 ──────────────────────────────────────────
     @patch('controllers.category_controller.app_cache')
-    @patch('controllers.category_controller.CategoryModel.create', return_value=3)
-    @patch('controllers.category_controller.CategoryModel.exists', return_value=False)
-    def test_creation_reussie_retourne_id(self, mock_exists, mock_create, mock_cache):
+    @patch('controllers.category_controller.CategoryModel.create',
+           return_value=3)
+    @patch('controllers.category_controller.CategoryModel.exists',
+           return_value=False)
+    def test_creation_reussie_retourne_id(
+            self, mock_exists, mock_create, mock_cache):
         """
         TC-CC-CR-04 : create() avec données valides doit retourner
         (True, id) et invalider le cache.
         """
-        ok, cid = CategoryController.create('Électronique', 'Appareils électroniques')
+        ok, cid = CategoryController.create(
+            'Électronique', 'Appareils électroniques')
 
         self.assertTrue(ok)
         self.assertEqual(cid, 3)
-        mock_create.assert_called_once_with('Électronique', 'Appareils électroniques')
+        mock_create.assert_called_once_with(
+            'Électronique', 'Appareils électroniques')
         mock_cache.invalidate.assert_called_once()
 
     # ── TC-CC-CR-05 ──────────────────────────────────────────
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.create',
            side_effect=Exception("Duplicate entry"))
-    @patch('controllers.category_controller.CategoryModel.exists', return_value=False)
-    def test_exception_bdd_retourne_erreur(self, mock_exists, mock_create, mock_cache):
+    @patch('controllers.category_controller.CategoryModel.exists',
+           return_value=False)
+    def test_exception_bdd_retourne_erreur(
+            self, mock_exists, mock_create, mock_cache):
         """
         TC-CC-CR-05 : Si CategoryModel.create() lève une exception,
         create() doit retourner (False, message) sans la propager.
@@ -143,9 +157,9 @@ class TestCategoryControllerCreate(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryControllerUpdate(unittest.TestCase):
 
@@ -177,24 +191,29 @@ class TestCategoryControllerUpdate(unittest.TestCase):
     # ── TC-CC-UP-03 ──────────────────────────────────────────
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.update')
-    @patch('controllers.category_controller.CategoryModel.exists', return_value=False)
+    @patch('controllers.category_controller.CategoryModel.exists',
+           return_value=False)
     def test_update_reussi(self, mock_exists, mock_update, mock_cache):
         """
         TC-CC-UP-03 : update() avec données valides doit retourner
         (True, message) et invalider le cache.
         """
-        ok, msg = CategoryController.update(1, 'Téléphonie Mobile', 'Smartphones')
+        ok, msg = CategoryController.update(
+            1, 'Téléphonie Mobile', 'Smartphones')
 
         self.assertTrue(ok)
-        mock_update.assert_called_once_with(1, 'Téléphonie Mobile', 'Smartphones')
+        mock_update.assert_called_once_with(
+            1, 'Téléphonie Mobile', 'Smartphones')
         mock_cache.invalidate.assert_called_once()
 
     # ── TC-CC-UP-04 ──────────────────────────────────────────
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.update',
            side_effect=Exception("Erreur SQL"))
-    @patch('controllers.category_controller.CategoryModel.exists', return_value=False)
-    def test_exception_bdd_retourne_erreur(self, mock_exists, mock_update, mock_cache):
+    @patch('controllers.category_controller.CategoryModel.exists',
+           return_value=False)
+    def test_exception_bdd_retourne_erreur(
+            self, mock_exists, mock_update, mock_cache):
         """
         TC-CC-UP-04 : Si CategoryModel.update() lève une exception,
         update() doit retourner (False, message).
@@ -205,9 +224,9 @@ class TestCategoryControllerUpdate(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryControllerDelete(unittest.TestCase):
 
@@ -228,8 +247,10 @@ class TestCategoryControllerDelete(unittest.TestCase):
     # ── TC-CC-DE-02 ──────────────────────────────────────────
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.delete',
-           side_effect=ValueError("Impossible : 3 produit(s) utilisent cette catégorie."))
-    def test_suppression_categorie_avec_produits_retourne_erreur(self, mock_delete, mock_cache):
+           side_effect=ValueError(
+               "Impossible : 3 produits utilisent cette categorie."))
+    def test_suppression_categorie_avec_produits_retourne_erreur(
+            self, mock_delete, mock_cache):
         """
         TC-CC-DE-02 : delete() doit retourner (False, message) quand
         CategoryModel.delete() lève une ValueError (produits liés).
@@ -243,7 +264,8 @@ class TestCategoryControllerDelete(unittest.TestCase):
     @patch('controllers.category_controller.app_cache')
     @patch('controllers.category_controller.CategoryModel.delete',
            side_effect=Exception("Connexion perdue"))
-    def test_exception_inattendue_retourne_erreur(self, mock_delete, mock_cache):
+    def test_exception_inattendue_retourne_erreur(
+            self, mock_delete, mock_cache):
         """
         TC-CC-DE-03 : delete() doit retourner (False, message) pour
         toute exception inattendue.
@@ -254,13 +276,13 @@ class TestCategoryControllerDelete(unittest.TestCase):
         self.assertIsInstance(msg, str)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     loader = unittest.TestLoader()
-    suite  = unittest.TestSuite()
+    suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryControllerGetAll))
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryControllerCreate))
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryControllerUpdate))

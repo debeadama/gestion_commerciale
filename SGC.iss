@@ -24,8 +24,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
-PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=admin
 OutputDir=C:\gestion_commerciale
 OutputBaseFilename=mysetup
 SetupIconFile=C:\gestion_commerciale\sgc_logo.ico
@@ -60,6 +59,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 ; Installation de la base de données
-Filename: "{app}\install_db.bat"; Description: "Installer la base de données MySQL"; Flags: postinstall shellexec skipifsilent
+Filename: "{app}\install_db.bat"; Description: "Installer la base de données MySQL"; Flags: postinstall shellexec skipifsilent runascurrentuser; Verb: "runas"
 ; Lancement de l'application
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

@@ -13,14 +13,18 @@ Pour exécuter :
     python -m pytest tests/test_login.py -v
 """
 
+from controllers.auth_controller import SessionManager  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from unittest.mock import patch
-from controllers.auth_controller import SessionManager
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
 
 class TestLogin(unittest.TestCase):
@@ -36,7 +40,8 @@ class TestLogin(unittest.TestCase):
         SessionManager.logout()
 
     # ── TC-A-01 ─────────────────────────────────────────────
-    @patch('controllers.auth_controller.UserModel.get_by_username', return_value=None)
+    @patch('controllers.auth_controller.UserModel.get_by_username',
+           return_value=None)
     def test_username_vide_retourne_erreur(self, mock_get):
         """
         TC-A-01 : login() avec username vide doit retourner (False, message).
@@ -49,7 +54,8 @@ class TestLogin(unittest.TestCase):
         self.assertFalse(SessionManager.is_logged_in())
 
     # ── TC-A-02 ─────────────────────────────────────────────
-    @patch('controllers.auth_controller.UserModel.verify_password', return_value=False)
+    @patch('controllers.auth_controller.UserModel.verify_password',
+           return_value=False)
     @patch('controllers.auth_controller.UserModel.get_by_username')
     def test_password_vide_retourne_erreur(self, mock_get, mock_verify):
         """
@@ -69,7 +75,8 @@ class TestLogin(unittest.TestCase):
         self.assertFalse(SessionManager.is_logged_in())
 
     # ── TC-A-03 ─────────────────────────────────────────────
-    @patch('controllers.auth_controller.UserModel.get_by_username', return_value=None)
+    @patch('controllers.auth_controller.UserModel.get_by_username',
+           return_value=None)
     def test_utilisateur_inexistant_retourne_erreur(self, mock_get):
         """
         TC-A-03 : login() avec un username inconnu doit retourner
@@ -82,7 +89,8 @@ class TestLogin(unittest.TestCase):
         mock_get.assert_called_once_with('utilisateur_inconnu')
 
     # ── TC-A-04 ─────────────────────────────────────────────
-    @patch('controllers.auth_controller.UserModel.verify_password', return_value=False)
+    @patch('controllers.auth_controller.UserModel.verify_password',
+           return_value=False)
     @patch('controllers.auth_controller.UserModel.get_by_username')
     def test_mauvais_mot_de_passe_retourne_erreur(self, mock_get, mock_verify):
         """
@@ -101,7 +109,8 @@ class TestLogin(unittest.TestCase):
         mock_verify.assert_called_once()
 
     # ── TC-A-05 ─────────────────────────────────────────────
-    @patch('controllers.auth_controller.UserModel.verify_password', return_value=True)
+    @patch('controllers.auth_controller.UserModel.verify_password',
+           return_value=True)
     @patch('controllers.auth_controller.UserModel.get_by_username')
     def test_connexion_reussie_ouvre_session(self, mock_get, mock_verify):
         """

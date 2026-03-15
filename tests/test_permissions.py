@@ -3,13 +3,13 @@
 # Lancer avec : python -m pytest test_permissions.py -v
 
 import pytest
-from unittest.mock import patch
-from datetime import datetime
+from unittest.mock import patch  # noqa: E402
+from datetime import datetime  # noqa: E402
 
 
-# ---------------------------------------------------------------------------
+#
 # Helpers / Fixtures
-# ---------------------------------------------------------------------------
+#
 
 def make_user(username="alice", role="vendeur", password_hash="hashed_pw"):
     return {"username": username, "role": role, "password_hash": password_hash}
@@ -50,9 +50,9 @@ def admin():
     return SessionManager
 
 
-# ---------------------------------------------------------------------------
+#
 # 1. Login
-# ---------------------------------------------------------------------------
+#
 
 class TestLogin:
 
@@ -85,9 +85,9 @@ class TestLogin:
         assert SessionManager.get_role() == "vendeur"
 
 
-# ---------------------------------------------------------------------------
+#
 # 2. Logout
-# ---------------------------------------------------------------------------
+#
 
 class TestLogout:
 
@@ -101,28 +101,43 @@ class TestLogout:
         SessionManager.logout()
 
 
-# ---------------------------------------------------------------------------
+#
 # 3. Permissions — vendeur
-# ---------------------------------------------------------------------------
+#
 
 class TestVendeur:
 
-    @pytest.mark.parametrize("perm", ["view_clients", "edit_clients", "view_products", "create_sales", "view_sales"])
+    @pytest.mark.parametrize("perm",
+                             ["view_clients",
+                              "edit_clients",
+                              "view_products",
+                              "create_sales",
+                              "view_sales"])
     def test_permissions_autorisees(self, vendeur, perm):
         assert vendeur.has_permission(perm) is True
 
-    @pytest.mark.parametrize("perm", ["edit_products", "view_reports", "admin_panel"])
+    @pytest.mark.parametrize("perm",
+                             ["edit_products",
+                              "view_reports",
+                              "admin_panel"])
     def test_permissions_interdites(self, vendeur, perm):
         assert vendeur.has_permission(perm) is False
 
 
-# ---------------------------------------------------------------------------
+#
 # 4. Permissions — manager
-# ---------------------------------------------------------------------------
+#
 
 class TestManager:
 
-    @pytest.mark.parametrize("perm", ["view_clients", "edit_clients", "view_products", "edit_products", "view_sales", "create_sales", "view_reports"])
+    @pytest.mark.parametrize("perm",
+                             ["view_clients",
+                              "edit_clients",
+                              "view_products",
+                              "edit_products",
+                              "view_sales",
+                              "create_sales",
+                              "view_reports"])
     def test_permissions_autorisees(self, manager, perm):
         assert manager.has_permission(perm) is True
 
@@ -131,24 +146,32 @@ class TestManager:
         assert manager.has_permission(perm) is False
 
 
-# ---------------------------------------------------------------------------
+#
 # 5. Permissions — admin
-# ---------------------------------------------------------------------------
+#
 
 class TestAdmin:
 
-    @pytest.mark.parametrize("perm", ["view_clients", "edit_products", "view_reports", "admin_panel", "permission_inventee"])
+    @pytest.mark.parametrize("perm",
+                             ["view_clients",
+                              "edit_products",
+                              "view_reports",
+                              "admin_panel",
+                              "permission_inventee"])
     def test_admin_a_tout(self, admin, perm):
         assert admin.has_permission(perm) is True
 
 
-# ---------------------------------------------------------------------------
+#
 # 6. Utilisateur déconnecté
-# ---------------------------------------------------------------------------
+#
 
 class TestDeconnecte:
 
-    @pytest.mark.parametrize("perm", ["view_clients", "view_reports", "admin_panel"])
+    @pytest.mark.parametrize("perm",
+                             ["view_clients",
+                              "view_reports",
+                              "admin_panel"])
     def test_aucune_permission(self, perm):
         from controllers.auth_controller import SessionManager
         assert SessionManager.has_permission(perm) is False

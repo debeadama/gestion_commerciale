@@ -14,19 +14,23 @@ Pour exécuter :
     python -m pytest tests/test_model_sale.py -v
 """
 
+from models.sale import SaleModel  # noqa: E402
+from unittest.mock import patch, MagicMock  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch, MagicMock
-from models.sale import SaleModel
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all() — filtres search & statut
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetAll(unittest.TestCase):
 
@@ -79,9 +83,9 @@ class TestSaleModelGetAll(unittest.TestCase):
         self.assertIn('partielle', params)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetById(unittest.TestCase):
 
@@ -104,9 +108,9 @@ class TestSaleModelGetById(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_details()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetDetails(unittest.TestCase):
 
@@ -138,9 +142,9 @@ class TestSaleModelGetDetails(unittest.TestCase):
         self.assertIn('vente_id', call_sql)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST generate_numero()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGenerateNumero(unittest.TestCase):
 
@@ -163,14 +167,15 @@ class TestSaleModelGenerateNumero(unittest.TestCase):
         self.assertTrue(numero.endswith('0005'))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelCreate(unittest.TestCase):
 
     @patch('models.sale.db')
-    @patch.object(SaleModel, 'generate_numero', return_value='FAC-20240115-0001')
+    @patch.object(SaleModel, 'generate_numero',
+                  return_value='FAC-20240115-0001')
     def test_create_retourne_sale_id(self, mock_num, mock_db):
         """TC-SMC-01 : create() retourne l'ID de la vente créée."""
         mock_db.execute_update.return_value = 7
@@ -186,9 +191,11 @@ class TestSaleModelCreate(unittest.TestCase):
         self.assertEqual(result, 7)
 
     @patch('models.sale.db')
-    @patch.object(SaleModel, 'generate_numero', return_value='FAC-20240115-0002')
+    @patch.object(SaleModel, 'generate_numero',
+                  return_value='FAC-20240115-0002')
     def test_create_insere_lignes_panier(self, mock_num, mock_db):
-        """TC-SMC-02 : create() insère une ligne par produit du panier + update stock."""
+        """TC-SMC-02 : create() insere une ligne par produit
+        du panier + update stock."""
         mock_db.execute_update.return_value = 8
         sale_data = {
             'client_id': 1, 'user_id': 1,
@@ -204,7 +211,8 @@ class TestSaleModelCreate(unittest.TestCase):
         self.assertEqual(mock_db.execute_update.call_count, 5)
 
     @patch('models.sale.db')
-    @patch.object(SaleModel, 'generate_numero', return_value='FAC-20240115-0003')
+    @patch.object(SaleModel, 'generate_numero',
+                  return_value='FAC-20240115-0003')
     def test_create_panier_vide_pas_de_lignes(self, mock_num, mock_db):
         """TC-SMC-03 : create() avec panier vide insère seulement la vente."""
         mock_db.execute_update.return_value = 9
@@ -219,9 +227,9 @@ class TestSaleModelCreate(unittest.TestCase):
         self.assertEqual(mock_db.execute_update.call_count, 1)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_pending()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetPending(unittest.TestCase):
 
@@ -246,9 +254,9 @@ class TestSaleModelGetPending(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_kpi()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetKpi(unittest.TestCase):
 
@@ -272,9 +280,9 @@ class TestSaleModelGetKpi(unittest.TestCase):
         self.assertEqual(result, {})
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_top_products()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetTopProducts(unittest.TestCase):
 
@@ -295,9 +303,9 @@ class TestSaleModelGetTopProducts(unittest.TestCase):
         self.assertEqual(params, (10,))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_top_clients()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetTopClients(unittest.TestCase):
 
@@ -313,9 +321,9 @@ class TestSaleModelGetTopClients(unittest.TestCase):
         self.assertEqual(params, (5,))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_monthly_revenue()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetMonthlyRevenue(unittest.TestCase):
 
@@ -336,9 +344,9 @@ class TestSaleModelGetMonthlyRevenue(unittest.TestCase):
         self.assertEqual(params, (12,))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST add_payment()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelAddPayment(unittest.TestCase):
 
@@ -399,9 +407,9 @@ class TestSaleModelAddPayment(unittest.TestCase):
         self.assertIn('payee', call_args[1])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST validate()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelValidate(unittest.TestCase):
 
@@ -415,7 +423,8 @@ class TestSaleModelValidate(unittest.TestCase):
 
     @patch('models.sale.db')
     def test_validate_sans_reste_met_a_jour_statut(self, mock_db):
-        """TC-SV-02 : validate() avec reste = 0 update directement le statut."""
+        """TC-SV-02 : validate() reste=0
+        update directement le statut."""
         mock_db.execute_update.return_value = True
         result = SaleModel.validate(1, 0)
         self.assertTrue(result)
@@ -423,9 +432,9 @@ class TestSaleModelValidate(unittest.TestCase):
         self.assertIn('payee', call_sql)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST cancel()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelCancel(unittest.TestCase):
 
@@ -465,7 +474,8 @@ class TestSaleModelCancel(unittest.TestCase):
     @patch.object(SaleModel, 'get_by_id', return_value={
         'id': 1, 'statut': 'en_cours'
     })
-    def test_cancel_reussie_restaure_stock(self, mock_get, mock_details, mock_db):
+    def test_cancel_reussie_restaure_stock(
+            self, mock_get, mock_details, mock_db):
         """TC-SC-04 : cancel() restaure le stock de chaque produit."""
         mock_db.execute_update.return_value = True
         result = SaleModel.cancel(1)
@@ -474,9 +484,9 @@ class TestSaleModelCancel(unittest.TestCase):
         self.assertEqual(mock_db.execute_update.call_count, 3)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST count()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelCount(unittest.TestCase):
 
@@ -495,9 +505,9 @@ class TestSaleModelCount(unittest.TestCase):
         self.assertEqual(result, 0)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_recent()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelGetRecent(unittest.TestCase):
 
@@ -518,9 +528,9 @@ class TestSaleModelGetRecent(unittest.TestCase):
         self.assertEqual(params, (5,))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_dashboard_stats()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelDashboardStats(unittest.TestCase):
 
@@ -543,9 +553,9 @@ class TestSaleModelDashboardStats(unittest.TestCase):
         self.assertEqual(result, {})
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_report_ventes()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelReportVentes(unittest.TestCase):
 
@@ -568,9 +578,9 @@ class TestSaleModelReportVentes(unittest.TestCase):
         self.assertIn('user_id', sql)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_report_impayes()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelReportImpayes(unittest.TestCase):
 
@@ -584,16 +594,17 @@ class TestSaleModelReportImpayes(unittest.TestCase):
 
     @patch('models.sale.db')
     def test_get_report_impayes_avec_vendeur(self, mock_db):
-        """TC-SRI-02 : get_report_impayes() avec vendeur_id ajoute le filtre."""
+        """TC-SRI-02 : get_report_impayes() avec vendeur_id
+        ajoute le filtre."""
         mock_db.execute_query.return_value = []
         SaleModel.get_report_impayes('2024-01-01', '2024-01-31', vendeur_id=2)
         params = mock_db.execute_query.call_args[0][1]
         self.assertIn(2, params)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_report_vendeurs()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleModelReportVendeurs(unittest.TestCase):
 
@@ -616,9 +627,9 @@ class TestSaleModelReportVendeurs(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

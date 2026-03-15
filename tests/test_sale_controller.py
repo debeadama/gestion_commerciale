@@ -12,30 +12,38 @@ Pour exécuter :
     python -m pytest tests/test_sale_controller.py -v
 """
 
+from controllers.sale_controller import SaleController  # noqa: E402
+from unittest.mock import patch, MagicMock  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from unittest.mock import patch, MagicMock
-from controllers.sale_controller import SaleController
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
 
 def make_panier(produit_id=1, quantite=2, prix=50000):
-    return [{'produit_id': produit_id, 'quantite': quantite, 'prix_unitaire': prix}]
+    return [{'produit_id': produit_id,
+             'quantite': quantite,
+             'prix_unitaire': prix}]
+
 
 def make_produit(stock=10, nom='Câble USB'):
     return {'id': 1, 'nom': nom, 'stock_actuel': stock}
+
 
 def make_vente(statut='en_cours', total=100000, paye=0, reste=100000):
     return {'id': 1, 'statut': statut, 'montant_total': total,
             'montant_paye': paye, 'montant_reste': reste}
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerGetAll(unittest.TestCase):
 
@@ -61,9 +69,9 @@ class TestSaleControllerGetAll(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerGetById(unittest.TestCase):
 
@@ -75,16 +83,17 @@ class TestSaleControllerGetById(unittest.TestCase):
         self.assertEqual(result['statut'], 'payee')
         mock_get.assert_called_once_with(1)
 
-    @patch('controllers.sale_controller.SaleModel.get_by_id', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_by_id',
+           return_value=None)
     def test_get_by_id_retourne_none(self, mock_get):
         """TC-SCB-02 : get_by_id() retourne None si vente inexistante."""
         result = SaleController.get_by_id(999)
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_details()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerGetDetails(unittest.TestCase):
 
@@ -96,16 +105,17 @@ class TestSaleControllerGetDetails(unittest.TestCase):
         self.assertEqual(len(result), 1)
         mock_get.assert_called_once_with(1)
 
-    @patch('controllers.sale_controller.SaleModel.get_details', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_details',
+           return_value=None)
     def test_get_details_retourne_liste_vide_si_none(self, mock_get):
         """TC-SCD-02 : get_details() retourne [] si None."""
         result = SaleController.get_details(99)
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_pending()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerGetPending(unittest.TestCase):
 
@@ -117,16 +127,17 @@ class TestSaleControllerGetPending(unittest.TestCase):
         self.assertEqual(len(result), 1)
         mock_get.assert_called_once()
 
-    @patch('controllers.sale_controller.SaleModel.get_pending', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_pending',
+           return_value=None)
     def test_get_pending_retourne_liste_vide_si_none(self, mock_get):
         """TC-SCP-02 : get_pending() retourne [] si None."""
         result = SaleController.get_pending()
         self.assertEqual(result, [])
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerCreate(unittest.TestCase):
 
@@ -136,7 +147,8 @@ class TestSaleControllerCreate(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn('vide', msg.lower())
 
-    @patch('controllers.sale_controller.ProductModel.get_by_id', return_value=None)
+    @patch('controllers.sale_controller.ProductModel.get_by_id',
+           return_value=None)
     def test_produit_introuvable_retourne_erreur(self, mock_get):
         """TC-SC-02 : produit inexistant retourne (False, message)."""
         ok, msg = SaleController.create(
@@ -208,7 +220,8 @@ class TestSaleControllerCreate(unittest.TestCase):
     @patch('controllers.sale_controller.SaleModel.create', return_value=9)
     @patch('controllers.sale_controller.ProductModel.get_by_id',
            return_value=make_produit(stock=10))
-    def test_vente_en_cours_sans_paiement(self, mock_prod, mock_create, mock_user):
+    def test_vente_en_cours_sans_paiement(
+            self, mock_prod, mock_create, mock_user):
         """TC-SC-08 : paiement = 0 → statut en_cours."""
         ok, sid = SaleController.create(
             client_id=1, panier=make_panier(quantite=1, prix=50000),
@@ -223,20 +236,22 @@ class TestSaleControllerCreate(unittest.TestCase):
            side_effect=Exception("Erreur SQL"))
     @patch('controllers.sale_controller.ProductModel.get_by_id',
            return_value=make_produit(stock=10))
-    def test_exception_bdd_retourne_erreur(self, mock_prod, mock_create, mock_user):
+    def test_exception_bdd_retourne_erreur(
+            self, mock_prod, mock_create, mock_user):
         """TC-SC-09 : exception BDD retourne (False, message)."""
         ok, msg = SaleController.create(
             client_id=1, panier=make_panier(), montant_paye=0)
         self.assertFalse(ok)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST add_payment()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerAddPayment(unittest.TestCase):
 
-    @patch('controllers.sale_controller.SaleModel.get_by_id', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_by_id',
+           return_value=None)
     def test_vente_introuvable(self, mock_get):
         """TC-AP-01 : vente inexistante retourne (False, message)."""
         ok, msg = SaleController.add_payment(999, 10000)
@@ -300,9 +315,9 @@ class TestSaleControllerAddPayment(unittest.TestCase):
         self.assertFalse(ok)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST validate()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerValidate(unittest.TestCase):
 
@@ -314,7 +329,8 @@ class TestSaleControllerValidate(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn('permission', msg.lower())
 
-    @patch('controllers.sale_controller.SaleModel.get_by_id', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_by_id',
+           return_value=None)
     @patch('controllers.sale_controller.SessionManager.has_permission',
            return_value=True)
     def test_vente_introuvable(self, mock_perm, mock_get):
@@ -355,13 +371,14 @@ class TestSaleControllerValidate(unittest.TestCase):
         self.assertFalse(ok)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST cancel()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerCancel(unittest.TestCase):
 
-    @patch('controllers.sale_controller.SaleModel.get_by_id', return_value=None)
+    @patch('controllers.sale_controller.SaleModel.get_by_id',
+           return_value=None)
     def test_vente_introuvable(self, mock_get):
         """TC-SCN-01 : vente inexistante retourne (False, message)."""
         ok, msg = SaleController.cancel(999)
@@ -403,9 +420,9 @@ class TestSaleControllerCancel(unittest.TestCase):
         self.assertFalse(ok)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST méthodes statistiques
-# ══════════════════════════════════════════════════════════════
+
 
 class TestSaleControllerStats(unittest.TestCase):
 
@@ -476,7 +493,8 @@ class TestSaleControllerStats(unittest.TestCase):
            return_value=[])
     def test_get_report_impayes(self, mock_rep):
         """TC-ST-09 : get_report_impayes() délègue au modèle."""
-        SaleController.get_report_impayes('2024-01-01', '2024-01-31', vendeur_id=2)
+        SaleController.get_report_impayes(
+            '2024-01-01', '2024-01-31', vendeur_id=2)
         mock_rep.assert_called_once_with('2024-01-01', '2024-01-31', 2)
 
     @patch('controllers.sale_controller.SaleModel.get_report_vendeurs',
@@ -488,9 +506,9 @@ class TestSaleControllerStats(unittest.TestCase):
         mock_rep.assert_called_once_with('2024-01-01', '2024-01-31')
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

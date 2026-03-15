@@ -1,80 +1,85 @@
 # main.py
-# Point d'entrée principal de l'application SGC (Système de Gestion Commerciale)
+"""
+Point d'entree principal de l'application SGC.
 
-import sys
+Systeme de Gestion Commerciale — PyQt6 + MySQL.
+"""
+
 import os
+import sys
+
 from dotenv import load_dotenv
 
-# ════════════════════════════════════════════════════════════════════════════
-#  CONFIGURATION DU CHEMIN DU FICHIER .env
-# ════════════════════════════════════════════════════════════════════════════
+# ------------------------------------------------------------------
+# Configuration du chemin du fichier .env
+# ------------------------------------------------------------------
 
-# Détecter si on est dans un exécutable PyInstaller ou en mode développement
+# Detecter si on est dans un executable PyInstaller ou en developpement
 if getattr(sys, 'frozen', False):
-    # Mode exécutable : le .env est dans le même dossier que l'exe
+    # Mode executable : le .env est dans le meme dossier que l'exe
     application_path = os.path.dirname(sys.executable)
 else:
-    # Mode développement : le .env est à la racine du projet
+    # Mode developpement : le .env est a la racine du projet
     application_path = os.path.dirname(os.path.abspath(__file__))
 
 # Charger le fichier .env depuis le bon emplacement
 env_path = os.path.join(application_path, '.env')
 load_dotenv(env_path)
 
-# Affichage de debug (optionnel, à enlever en production)
+# Affichage de debug (desactiver en production via APP_DEBUG=False)
 if os.getenv('APP_DEBUG', 'False').lower() == 'true':
-    print(f"🔍 Chemin application : {application_path}")
-    print(f"📄 Fichier .env existe : {os.path.exists(env_path)}")
-    print(f"🗄️  Base de données    : {os.getenv('DB_NAME', 'N/A')}")
+    print(f"Chemin application : {application_path}")
+    print(f"Fichier .env existe : {os.path.exists(env_path)}")
+    print(f"Base de donnees    : {os.getenv('DB_NAME', 'N/A')}")
 
-# ════════════════════════════════════════════════════════════════════════════
+# ------------------------------------------------------------------
 
-from PyQt6.QtWidgets import QApplication, QMessageBox
-from database.connection import db       # Singleton de connexion à la base de données
-from views.login_view import LoginView   # Fenêtre de connexion utilisateur
+from PyQt6.QtWidgets import QApplication, QMessageBox  # noqa: E402
+
+from database.connection import db
+from views.login_view import LoginView
 
 
 def main():
-    # --- Initialisation de l'application Qt ---
+    """
+    Initialise et lance l'application SGC.
+
+    Verifie la connexion a la base de donnees, affiche la fenetre
+    de connexion puis ouvre la fenetre principale apres authentification.
+    """
     app = QApplication(sys.argv)
-    app.setApplicationName("SGC - Systeme de Gestion Commerciale -")
-    app.setStyle("Fusion")  # Thème visuel uniforme sur tous les OS
-    
-    # --- Vérification de la connexion à la base de données ---
-    # Si la connexion échoue, on informe l'utilisateur et on quitte proprement
+    app.setApplicationName("SGC - Systeme de Gestion Commerciale")
+    app.setStyle("Fusion")  # Theme visuel uniforme sur tous les OS
+
+    # Verification de la connexion a la base de donnees
     if not db.connect():
         QMessageBox.critical(
             None,
             "Erreur de connexion",
-            "Impossible de se connecter a la base de données.\n\n"
-            "Verifiez que MySQL a démarre et que le fichier .env. est correct\n\n"
-            f"Chemin recherché : {env_path}"
+            "Impossible de se connecter a la base de donnees.\n\n"
+            "Verifiez que MySQL a demarre et que le fichier .env "
+            "est correct.\n\n"
+            f"Chemin recherche : {env_path}"
         )
-        sys.exit(1)  # Code de sortie 1 = erreur
-    
-    # --- Affichage de la fenêtre de connexion ---
+        sys.exit(1)
+
     login = LoginView()
-    
+
     def on_login_accepted():
         """
-        Callback déclenché lorsque l'utilisateur s'authentifie avec succès.
-        La MainWindow est importée.
+        Ouvre la fenetre principale apres authentification reussie.
+
+        Importe MainWindow a la demande pour eviter les imports circulaires.
         """
-        from views.main_window import MainWindow
+        from views.main_window import MainWindow  # noqa: E402
         app._main_window = MainWindow()
-        app._main_window.showMaximized()  # Ouverture en plein écran
-    
-    # Connexion du signal Qt : login réussi → ouverture de la fenêtre principale
+        app._main_window.showMaximized()
+
     login.accepted.connect(on_login_accepted)
-    
-    # Affichage bloquant de la boîte de dialogue de login (mode modal)
     login.exec()
-    
-    # --- Lancement de la boucle événementielle Qt ---
-    # sys.exit() propage le code de retour de l'application au système
+
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    # Garantit que main() n'est appelé que si le script est exécuté directement
     main()

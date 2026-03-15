@@ -20,19 +20,23 @@ Pour exécuter :
     python -m pytest tests/test_category_model.py -v
 """
 
+from models.category import CategoryModel  # noqa: E402
+from unittest.mock import patch, MagicMock  # noqa: E402
 import unittest
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
-from unittest.mock import patch, MagicMock
-from models.category import CategoryModel
 
 
-# ══════════════════════════════════════════════════════════════
 # TEST get_all()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelGetAll(unittest.TestCase):
 
@@ -44,7 +48,7 @@ class TestCategoryModelGetAll(unittest.TestCase):
         et retourner la liste des catégories.
         """
         mock_db.execute_query.return_value = [
-            {'id': 1, 'nom': 'Téléphonie',   'nb_produits': 8},
+            {'id': 1, 'nom': 'Téléphonie', 'nb_produits': 8},
             {'id': 2, 'nom': 'Informatique', 'nb_produits': 12},
         ]
 
@@ -69,9 +73,9 @@ class TestCategoryModelGetAll(unittest.TestCase):
         self.assertEqual(len(result), 0)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST get_by_id()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelGetById(unittest.TestCase):
 
@@ -106,9 +110,9 @@ class TestCategoryModelGetById(unittest.TestCase):
         self.assertIsNone(result)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST create()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelCreate(unittest.TestCase):
 
@@ -143,9 +147,9 @@ class TestCategoryModelCreate(unittest.TestCase):
         self.assertEqual(params[1], 'Tables et chaises')
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST update()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelUpdate(unittest.TestCase):
 
@@ -168,9 +172,9 @@ class TestCategoryModelUpdate(unittest.TestCase):
         self.assertEqual(params[2], 1)  # category_id en 3ème position
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST delete()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelDelete(unittest.TestCase):
 
@@ -221,9 +225,9 @@ class TestCategoryModelDelete(unittest.TestCase):
         self.assertEqual(params[0], 7)
 
 
-# ══════════════════════════════════════════════════════════════
+
 # TEST exists()
-# ══════════════════════════════════════════════════════════════
+
 
 class TestCategoryModelExists(unittest.TestCase):
 
@@ -285,13 +289,13 @@ class TestCategoryModelExists(unittest.TestCase):
         self.assertEqual(params, ('Informatique',))
 
 
-# ══════════════════════════════════════════════════════════════
+
 # POINT D'ENTRÉE
-# ══════════════════════════════════════════════════════════════
+
 
 if __name__ == '__main__':
     loader = unittest.TestLoader()
-    suite  = unittest.TestSuite()
+    suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryModelGetAll))
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryModelGetById))
     suite.addTests(loader.loadTestsFromTestCase(TestCategoryModelCreate))
