@@ -1,0 +1,23 @@
+# Environnement virtuel
+venv/
+
+# Fichiers sensibles
+.env
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# InnoSetup output
+Output/
+mysetup.exe
+
+# IDE
+.vscode/
+.idea/
