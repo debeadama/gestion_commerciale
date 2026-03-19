@@ -22,7 +22,7 @@ Notez le mot de passe `root` créé pendant l'installation.
 
 ### 2. Lancer l'installateur
 
-Exécutez `mysetup.exe` en tant qu'administrateur et suivez les étapes.
+Exécutez `SGC_setup.exe` en tant qu'administrateur et suivez les étapes.
 
 A la fin de l'installation, cochez **"Installer la base de données MySQL"** puis cliquez sur **Terminer**.
 
