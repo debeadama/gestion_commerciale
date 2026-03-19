@@ -1,4 +1,4 @@
-# SGC — Système de Gestion Commerciale
+# SGC - Système de Gestion Commerciale
 
 Application de gestion commerciale développée avec Python 3.14 / PyQt6 / MySQL.
 
