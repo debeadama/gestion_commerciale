@@ -7,7 +7,7 @@ Application de gestion commerciale développée avec Python 3.14 / PyQt6 / MySQL
 ## Prérequis
 
 - Windows 10/11 64 bits
-- MySQL Server 5.7 ou 8.0
+- MySQL Server 8.0
 - Python 3.14 (pour le développement uniquement)
 
 ---
