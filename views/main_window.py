@@ -1,18 +1,19 @@
 # views/main_window.py
 import os
-from PyQt6 import uic
-from PyQt6.QtWidgets import (QMainWindow, QMessageBox, QVBoxLayout, QLabel)
-from PyQt6.QtCore import Qt, QTimer
+
 from controllers.auth_controller import SessionManager
+from PyQt6 import uic
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QVBoxLayout
 from views.clients_view import ClientsView
+from views.dashboard_view import DashboardView
 from views.products_view import ProductsView
 from views.sales_view import SalesView
-from views.stats_view import StatsView
 from views.settings_view import SettingsView
-from views.dashboard_view import DashboardView
+from views.stats_view import StatsView
 
 INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000
-WARNING_BEFORE_MS     =  1 * 60 * 1000
+WARNING_BEFORE_MS = 1 * 60 * 1000
 
 
 def _confirm(parent, title, message):
@@ -30,7 +31,10 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        ui_path = os.path.join(os.path.dirname(__file__), 'ui', 'main_window.ui')
+        ui_path = os.path.join(
+            os.path.dirname(__file__),
+            'ui',
+            'main_window.ui')
         uic.loadUi(ui_path, self)
         self._connect_buttons()
         self._apply_styles()
@@ -143,7 +147,8 @@ class MainWindow(QMainWindow):
             layout.setContentsMargins(0, 0, 0, 0)
         self.page_stats.layout().addWidget(self._stats_view)
 
-        if SessionManager.has_permission('all') or SessionManager.get_role() == 'manager':
+        if SessionManager.has_permission(
+                'all') or SessionManager.get_role() == 'manager':
             self._settings_view = SettingsView()
             if self.page_settings.layout() is None:
                 layout = QVBoxLayout(self.page_settings)
@@ -189,7 +194,7 @@ class MainWindow(QMainWindow):
         user = SessionManager.get_current_user()
         if user:
             role_labels = {
-                'admin':   'Administrateur',
+                'admin': 'Administrateur',
                 'manager': 'Manager',
                 'vendeur': 'Vendeur',
             }
@@ -197,7 +202,8 @@ class MainWindow(QMainWindow):
             self.user_info.setText(
                 f"Utilisateur connecté : {user['username']}\n"
                 f"Profil : {role}")
-        if not SessionManager.has_permission('all') and SessionManager.get_role() != 'manager':
+        if not SessionManager.has_permission(
+                'all') and SessionManager.get_role() != 'manager':
             self.btn_settings.setVisible(False)
 
     # ----------------------------------------------------------
@@ -205,7 +211,10 @@ class MainWindow(QMainWindow):
     # ----------------------------------------------------------
 
     def _logout(self):
-        if _confirm(self, "Déconnexion", "Voulez-vous vraiment vous deconnecter ?"):
+        if _confirm(
+            self,
+            "Déconnexion",
+                "Voulez-vous vraiment vous deconnecter ?"):
             self._inactivity_timer.stop()
             self._logout_timer.stop()
             SessionManager.logout()
@@ -233,30 +242,83 @@ class MainWindow(QMainWindow):
     # ----------------------------------------------------------
 
     def _apply_styles(self):
-        style = (
-            "QFrame#sidebar { background-color: #003366; }"
-            "QFrame#title_frame { background-color: #003366; padding: 15px; }"
-            "QLabel#app_title { color: white; font-size: 40px; font-weight: bold; }"
-            "QLabel#app_subtitle { color: #94a3b8; font-size: 11px; }"
-            "QLabel#user_info { color: #cbd5e1; font-size: 12px; padding: 10px; }"
-            "QPushButton#btn_dashboard, QPushButton#btn_clients,"
-            "QPushButton#btn_products, QPushButton#btn_sales,"
-            "QPushButton#btn_stats, QPushButton#btn_settings {"
-            "    background-color: transparent; color: #94a3b8;"
-            "    border: none; text-align: left;"
-            "    padding-left: 30px; font-size: 13px; }"
-            "QPushButton#btn_dashboard:hover, QPushButton#btn_clients:hover,"
-            "QPushButton#btn_products:hover, QPushButton#btn_sales:hover,"
-            "QPushButton#btn_stats:hover, QPushButton#btn_settings:hover {"
-            "    background-color: #334155; color: white; }"
-            "QPushButton#btn_dashboard:checked, QPushButton#btn_clients:checked,"
-            "QPushButton#btn_products:checked, QPushButton#btn_sales:checked,"
-            "QPushButton#btn_stats:checked, QPushButton#btn_settings:checked {"
-            "    background-color: #1976D2; color: white; font-weight: bold; }"
-            "QPushButton#btn_logout { background-color: transparent; color: #f87171;"
-            "    border-top: 1px solid #334155; text-align: left;"
-            "    padding-left: 25px; font-size: 15px; }"
-            "QPushButton#btn_logout:hover { background-color: #7f1d1d; color: white; }"
-            "QStackedWidget#content_area { background-color: #f1f5f9; }"
-        )
-        self.setStyleSheet(style)
+        self.setStyleSheet("""
+            /* ── Sidebar ──────────────────────────────────── */
+            QFrame#sidebar   { background-color: #0f172a; border: none; }
+            QFrame#title_frame { background-color: #0f172a; border: none; }
+
+            QLabel#app_title {
+                color: #ffffff;
+                font-size: 22px;
+                font-weight: bold;
+                letter-spacing: 3px;
+                background: transparent;
+            }
+            QLabel#app_subtitle {
+                color: #475569;
+                font-size: 10px;
+                letter-spacing: 0.5px;
+                background: transparent;
+            }
+            QLabel#user_info {
+                color: #64748b;
+                font-size: 11px;
+                padding: 0 12px;
+                background: transparent;
+            }
+
+            /* Boutons de navigation */
+            QPushButton#btn_dashboard, QPushButton#btn_clients,
+            QPushButton#btn_products,  QPushButton#btn_sales,
+            QPushButton#btn_stats,     QPushButton#btn_settings {
+                background-color: transparent;
+                color: #64748b;
+                border: none;
+                border-left: 3px solid transparent;
+                text-align: left;
+                padding-left: 18px;
+                font-size: 12px;
+                font-weight: 500;
+                max-height: 40px;
+                min-height: 40px;
+                border-radius: 0;
+            }
+            QPushButton#btn_dashboard:hover, QPushButton#btn_clients:hover,
+            QPushButton#btn_products:hover,  QPushButton#btn_sales:hover,
+            QPushButton#btn_stats:hover,     QPushButton#btn_settings:hover {
+                background-color: #1e293b;
+                color: #cbd5e1;
+                border-left: 3px solid #334155;
+            }
+            QPushButton#btn_dashboard:checked, QPushButton#btn_clients:checked,
+            QPushButton#btn_products:checked,  QPushButton#btn_sales:checked,
+            QPushButton#btn_stats:checked,     QPushButton#btn_settings:checked {
+                background-color: #1e3a5f;
+                color: #ffffff;
+                border-left: 3px solid #1976D2;
+                font-weight: bold;
+            }
+
+            /* Déconnexion */
+            QPushButton#btn_logout {
+                background-color: transparent;
+                color: #475569;
+                border: none;
+                border-top: 1px solid #1e293b;
+                text-align: left;
+                padding-left: 18px;
+                font-size: 12px;
+                max-height: 36px;
+                min-height: 36px;
+                border-radius: 0;
+                margin: 0 0 4px 0;
+            }
+            QPushButton#btn_logout:hover {
+                background-color: #450a0a;
+                color: #fca5a5;
+                border-top: 1px solid #1e293b;
+            }
+
+            /* Zone de contenu */
+            QStackedWidget#content_area { background-color: #f8fafc; }
+        """)

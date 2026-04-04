@@ -2,6 +2,7 @@
 # Charge les fichiers .ui créés avec Qt Designer
 
 import os
+
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 

@@ -10,23 +10,28 @@ Usage :
         data = MyController.get_all()[offset:offset+limit]
         self._populate_table(data)
 """
-from PyQt6.QtWidgets import (
-    QWidget, QHBoxLayout, QLabel, QPushButton, QComboBox
-)
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QWidget,
+)
 
 
 class PaginationWidget(QWidget):
-    """Barre de pagination avec boutons Précédent / Suivant et sélecteur de taille."""
+    """Barre de pagination avec boutons Précédent / Suivant
+    et sélecteur de taille de page."""
 
     page_changed = pyqtSignal(int, int, int)  # (page, offset, limit)
 
     def __init__(self, page_size: int = 50, parent=None):
         super().__init__(parent)
-        self._page      = 1
+        self._page = 1
         self._page_size = page_size
-        self._total     = 0
+        self._total = 0
         self._build_ui()
 
     # ----------------------------------------------------------
@@ -59,13 +64,13 @@ class PaginationWidget(QWidget):
 
         # Navigation
         self.btn_first = self._nav_btn("«")
-        self.btn_prev  = self._nav_btn("‹")
-        self.lbl_page  = QLabel("Page 1 / 1")
+        self.btn_prev = self._nav_btn("‹")
+        self.lbl_page = QLabel("Page 1 / 1")
         self.lbl_page.setFixedWidth(90)
         self.lbl_page.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_page.setStyleSheet("font-size: 12px; color: #1e293b;")
-        self.btn_next  = self._nav_btn("›")
-        self.btn_last  = self._nav_btn("»")
+        self.btn_next = self._nav_btn("›")
+        self.btn_last = self._nav_btn("»")
 
         self.btn_first.clicked.connect(self.go_first)
         self.btn_prev.clicked.connect(self.go_prev)
@@ -95,15 +100,16 @@ class PaginationWidget(QWidget):
     # ----------------------------------------------------------
 
     def set_total(self, total: int):
-        """Definit le nombre total d'enregistrements et actualise l'affichage."""
+        """Definit le nombre total d'enregistrements
+    et actualise l'affichage."""
         self._total = total
-        self._page  = min(self._page, max(1, self.page_count()))
+        self._page = min(self._page, max(1, self.page_count()))
         self._update_ui()
 
     def reset(self, total: int):
         """Remet a la page 1 avec un nouveau total."""
         self._total = total
-        self._page  = 1
+        self._page = 1
         self._update_ui()
 
     def page_count(self) -> int:
@@ -144,7 +150,7 @@ class PaginationWidget(QWidget):
 
     def _on_size_changed(self):
         self._page_size = self.size_combo.currentData()
-        self._page      = 1
+        self._page = 1
         self._emit()
 
     def _emit(self):

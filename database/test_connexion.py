@@ -1,15 +1,17 @@
-# test_connexion.py — À supprimer après le test
+# database/test_connexion.py
 from database.connection import db
 
-print("Test de connexion à MySQL...")
 
-if db.connect():
-    print("✅ Connexion réussie !")
-    
-    # Test simple : liste les tables
-    result = db.execute_query("SHOW TABLES")
-    print(f"Tables trouvées : {result}")
-    
-    db.close()
-else:
-    print("❌ Connexion échouée. Vérifiez votre .env et que MySQL est démarré.")
+def test_connexion():
+    """Vérifie que la connexion MySQL fonctionne."""
+    print("\nTest de connexion à MySQL...")
+
+    assert db.connect(), "Connexion MySQL échouée"
+    print("Connexion réussie !")
+
+    tables = db.execute_query("SHOW TABLES")
+    assert tables, "Aucune table trouvée"
+    print(f"Tables trouvées : {tables}")
+
+    db.disconnect()   # ← nom correct
+    print("Déconnexion réussie !")

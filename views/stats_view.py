@@ -1,17 +1,27 @@
 # views/stats_view.py
-import os
 from datetime import datetime
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QFrame, QTableWidget, QTableWidgetItem,
-    QPushButton, QSizePolicy, QComboBox,
-    QDateEdit, QTabWidget, QMessageBox, QFileDialog
-)
-from PyQt6.QtCore import Qt, QDate
-from PyQt6.QtGui import QFont, QColor
-from controllers.sale_controller import SaleController
+
 from controllers.product_controller import ProductController
+from controllers.sale_controller import SaleController
 from controllers.user_controller import UserController
+from PyQt6.QtCore import QDate, Qt
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDateEdit,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class StatsView(QWidget):
@@ -78,9 +88,10 @@ class StatsView(QWidget):
         # Cartes CA
         ca_layout = QHBoxLayout()
         ca_layout.setSpacing(12)
-        self.card_jour    = self._make_card("CA Aujourd'hui",   "0.00", "#1976D2")
-        self.card_semaine = self._make_card("CA Cette Semaine", "0.00", "#059669")
-        self.card_mois    = self._make_card("CA Ce Mois",       "0.00", "#7c3aed")
+        self.card_jour = self._make_card("CA Aujourd'hui", "0.00", "#1976D2")
+        self.card_semaine = self._make_card(
+            "CA Cette Semaine", "0.00", "#059669")
+        self.card_mois = self._make_card("CA Ce Mois", "0.00", "#7c3aed")
         ca_layout.addWidget(self.card_jour['frame'])
         ca_layout.addWidget(self.card_semaine['frame'])
         ca_layout.addWidget(self.card_mois['frame'])
@@ -352,7 +363,9 @@ class StatsView(QWidget):
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 if col == 1:
                     item.setForeground(QColor('#dc2626'))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 self.stock_table.setItem(i, col, item)
         self.stock_table.resizeColumnsToContents()
 
@@ -377,8 +390,8 @@ class StatsView(QWidget):
     # ----------------------------------------------------------
 
     def _load_report_data(self):
-        debut      = self.date_debut.date().toString("yyyy-MM-dd")
-        fin        = self.date_fin.date().toString("yyyy-MM-dd")
+        debut = self.date_debut.date().toString("yyyy-MM-dd")
+        fin = self.date_fin.date().toString("yyyy-MM-dd")
         vendeur_id = self.filter_vendeur.currentData()
         self._load_rpt_ventes(debut, fin, vendeur_id)
         self._load_rpt_impayes(debut, fin, vendeur_id)
@@ -388,8 +401,8 @@ class StatsView(QWidget):
         rows = SaleController.get_report_ventes(debut, fin, vendeur_id)
         self.rpt_ventes_table.setRowCount(0)
         total_ca, nb = 0, 0
-        statut_colors = {'payee':'#16a34a','partielle':'#d97706',
-                         'en_cours':'#1976D2'}
+        statut_colors = {'payee': '#16a34a', 'partielle': '#d97706',
+                         'en_cours': '#1976D2'}
         for i, r in enumerate(rows):
             self.rpt_ventes_table.insertRow(i)
             statut = r.get('statut', '')
@@ -402,7 +415,9 @@ class StatsView(QWidget):
                 if col == 6:
                     item.setForeground(
                         QColor(statut_colors.get(statut, '#64748b')))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 self.rpt_ventes_table.setItem(i, col, item)
             total_ca += float(r['montant_total'])
             nb += 1
@@ -425,7 +440,9 @@ class StatsView(QWidget):
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 if col == 5:
                     item.setForeground(QColor('#dc2626'))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 self.rpt_impaye_table.setItem(i, col, item)
             total_reste += float(r['montant_reste'])
         self.rpt_impaye_table.resizeColumnsToContents()
@@ -436,9 +453,9 @@ class StatsView(QWidget):
         self.rpt_vendeur_table.setRowCount(0)
         for i, r in enumerate(rows):
             self.rpt_vendeur_table.insertRow(i)
-            ca   = float(r['ca'])
+            ca = float(r['ca'])
             paye = float(r['paye'])
-            taux = f"{(paye/ca*100):.1f} %" if ca > 0 else "0 %"
+            taux = f"{(paye / ca * 100):.1f} %" if ca > 0 else "0 %"
             vals = [r['vendeur'], str(r['nb_ventes']),
                     f"{ca:.2f}", f"{paye:.2f}", taux]
             for col, val in enumerate(vals):
@@ -462,7 +479,7 @@ class StatsView(QWidget):
     def _export_pdf(self):
         name, table = self._get_current_report_data()
         debut = self.date_debut.date().toString("dd/MM/yyyy")
-        fin   = self.date_fin.date().toString("dd/MM/yyyy")
+        fin = self.date_fin.date().toString("dd/MM/yyyy")
         filepath, _ = QFileDialog.getSaveFileName(
             self, "Enregistrer le rapport PDF",
             f"rapport_{name}_{datetime.now().strftime('%Y%m%d')}.pdf",
@@ -492,35 +509,40 @@ class StatsView(QWidget):
             QMessageBox.critical(self, "Erreur", str(e))
 
     def _generate_report_pdf(self, filepath, name, table, debut, fin):
-        from reportlab.lib.pagesizes import A4, landscape
         from reportlab.lib import colors
-        from reportlab.lib.units import cm
-        from reportlab.platypus import (SimpleDocTemplate, Table,
-                                        TableStyle, Paragraph, Spacer)
+        from reportlab.lib.pagesizes import A4, landscape
         from reportlab.lib.styles import ParagraphStyle
+        from reportlab.lib.units import cm
+        from reportlab.platypus import (
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
 
         titles = {
             'ventes_periode': 'Rapport des Ventes par Période',
-            'impayes':        'Rapport des Impayés',
+            'impayes': 'Rapport des Impayés',
             'ventes_vendeur': 'Rapport des Ventes par Vendeur',
         }
-        DARK  = colors.HexColor('#1e293b')
-        BLUE  = colors.HexColor('#1976D2')
+        DARK = colors.HexColor('#1e293b')
+        BLUE = colors.HexColor('#1976D2')
         LIGHT = colors.HexColor('#f8fafc')
 
         doc = SimpleDocTemplate(filepath, pagesize=landscape(A4),
-                                rightMargin=1.5*cm, leftMargin=1.5*cm,
-                                topMargin=1.5*cm, bottomMargin=1.5*cm)
+                                rightMargin=1.5 * cm, leftMargin=1.5 * cm,
+                                topMargin=1.5 * cm, bottomMargin=1.5 * cm)
         s_title = ParagraphStyle('T', fontSize=14, fontName='Helvetica-Bold',
                                  textColor=DARK)
-        s_sub   = ParagraphStyle('S', fontSize=9, fontName='Helvetica',
-                                 textColor=colors.HexColor('#64748b'))
+        s_sub = ParagraphStyle('S', fontSize=9, fontName='Helvetica',
+                               textColor=colors.HexColor('#64748b'))
         story = []
         story.append(Paragraph(titles.get(name, 'Rapport'), s_title))
         story.append(Paragraph(f"Période : {debut} au {fin}", s_sub))
         story.append(Paragraph(
             f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}", s_sub))
-        story.append(Spacer(1, 0.5*cm))
+        story.append(Spacer(1, 0.5 * cm))
 
         headers = [table.horizontalHeaderItem(c).text()
                    for c in range(table.columnCount())]
@@ -532,33 +554,33 @@ class StatsView(QWidget):
                 for col in range(table.columnCount())
             ])
 
-        W      = landscape(A4)[0] - 3*cm
-        col_w  = [W / table.columnCount()] * table.columnCount()
+        W = landscape(A4)[0] - 3 * cm
+        col_w = [W / table.columnCount()] * table.columnCount()
         t = Table(data, colWidths=col_w, repeatRows=1)
         t.setStyle(TableStyle([
-            ('BACKGROUND',    (0, 0), (-1, 0),  DARK),
-            ('TEXTCOLOR',     (0, 0), (-1, 0),  colors.white),
-            ('FONTNAME',      (0, 0), (-1, 0),  'Helvetica-Bold'),
-            ('FONTSIZE',      (0, 0), (-1, -1), 8),
-            ('ALIGN',         (0, 0), (-1, -1), 'CENTER'),
-            ('TOPPADDING',    (0, 0), (-1, -1), 5),
+            ('BACKGROUND', (0, 0), (-1, 0), DARK),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('ROWBACKGROUNDS',(0, 1), (-1, -1), [colors.white, LIGHT]),
-            ('GRID',          (0, 0), (-1, -1), 0.3,
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, LIGHT]),
+            ('GRID', (0, 0), (-1, -1), 0.3,
              colors.HexColor('#e2e8f0')),
-            ('LINEBELOW',     (0, 0), (-1, 0),  1.5, BLUE),
+            ('LINEBELOW', (0, 0), (-1, 0), 1.5, BLUE),
         ]))
         story.append(t)
         doc.build(story)
 
     def _generate_report_excel(self, filepath, table):
         import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.styles import Alignment, Font, PatternFill
 
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Rapport"
-        DARK_FILL  = PatternFill("solid", fgColor="1e293b")
+        DARK_FILL = PatternFill("solid", fgColor="1e293b")
         LIGHT_FILL = PatternFill("solid", fgColor="f8fafc")
 
         headers = [table.horizontalHeaderItem(c).text()
@@ -575,9 +597,9 @@ class StatsView(QWidget):
             fill = LIGHT_FILL if ri % 2 == 0 else PatternFill()
             for ci in range(table.columnCount()):
                 item = table.item(ri, ci)
-                cell = ws.cell(row=ri+2, column=ci+1,
+                cell = ws.cell(row=ri + 2, column=ci + 1,
                                value=item.text() if item else '')
-                cell.fill      = fill
+                cell.fill = fill
                 cell.alignment = Alignment(horizontal='center')
 
         for col in ws.columns:
@@ -593,61 +615,19 @@ class StatsView(QWidget):
 
     def _apply_styles(self):
         self.setStyleSheet("""
-            QTabWidget#main_tabs::pane { border: none; background: transparent; }
-            QTabWidget#main_tabs QTabBar::tab {
-                background: #f1f5f9; color: #64748b;
-                padding: 8px 20px; border: none;
-                border-bottom: 2px solid transparent;
-                font-size: 12px; font-weight: bold;
-            }
-            QTabWidget#main_tabs QTabBar::tab:selected {
-                color: #1976D2; border-bottom: 2px solid #1976D2;
+            QFrame#kpi_card, QFrame#stat_frame {
                 background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
             }
-            QTabWidget#report_tabs::pane { border: none; }
-            QTabWidget#report_tabs QTabBar::tab {
-                background: #f8fafc; color: #64748b;
-                padding: 6px 16px; border: none;
-                border-bottom: 2px solid transparent; font-size: 11px;
+            QPushButton#btn_primary {
+                background-color: #1976D2; color: white;
             }
-            QTabWidget#report_tabs QTabBar::tab:selected {
-                color: #1976D2; border-bottom: 2px solid #1976D2;
-            }
-            QFrame#kpi_card {
-                background: white; border: 1px solid #e2e8f0;
-                border-radius: 8px;
-            }
-            QFrame#stat_frame {
-                background: white; border: 1px solid #e2e8f0;
-                border-radius: 8px;
-            }
-            QDateEdit, QComboBox {
-                border: 1px solid #cbd5e1; border-radius: 5px;
-                padding: 4px 8px; font-size: 12px; background: white;
-            }
-            QPushButton {
-                border: none; border-radius: 5px; padding: 5px 12px;
-                font-size: 12px; color: white; background-color: #64748b;
-            }
-            QPushButton:hover { background-color: #475569; }
-            QPushButton#btn_primary { background-color: #1976D2; }
             QPushButton#btn_primary:hover { background-color: #1565C0; }
-            QPushButton#btn_pdf { background-color: #dc2626; }
-            QPushButton#btn_pdf:hover { background-color: #b91c1c; }
-            QPushButton#btn_excel { background-color: #16a34a; }
-            QPushButton#btn_excel:hover { background-color: #15803d; }
-            QTableWidget {
-                border: none; font-size: 12px;
-                background: white; gridline-color: #f1f5f9;
+            QPushButton#btn_excel {
+                background-color: #dcfce7; color: #16a34a;
             }
-            QTableWidget::item:selected {
-                background-color: #dbeafe; color: #1e293b;
-            }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 11px; padding: 6px;
-                border: none; border-bottom: 2px solid #e2e8f0;
-            }
+            QPushButton#btn_excel:hover { background-color: #bbf7d0; }
         """)
 
 
@@ -670,9 +650,14 @@ class BarChartWidget(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        from PyQt6.QtGui import (QPainter, QPen, QPainterPath,
-                                  QLinearGradient, QBrush)
         from PyQt6.QtCore import QPointF
+        from PyQt6.QtGui import (
+            QBrush,
+            QLinearGradient,
+            QPainter,
+            QPainterPath,
+            QPen,
+        )
 
         if not self.values:
             return
@@ -685,7 +670,7 @@ class BarChartWidget(QWidget):
         pad_l, pad_r, pad_t, pad_b = 65, 25, 20, 35
         chart_w = W - pad_l - pad_r
         chart_h = H - pad_t - pad_b
-        n       = len(self.values)
+        n = len(self.values)
         max_val = max(self.values) if max(self.values) > 0 else 1
 
         painter.fillRect(0, 0, W, H, QColor('white'))
@@ -730,7 +715,7 @@ class BarChartWidget(QWidget):
         for i in range(1, n):
             prev = points[i - 1]
             curr = points[i]
-            cx   = (prev.x() + curr.x()) / 2
+            cx = (prev.x() + curr.x()) / 2
             line_path.cubicTo(
                 QPointF(cx, prev.y()),
                 QPointF(cx, curr.y()), curr)

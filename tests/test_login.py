@@ -39,7 +39,7 @@ class TestLogin(unittest.TestCase):
         """Réinitialise la session après chaque test."""
         SessionManager.logout()
 
-    # ── TC-A-01 ─────────────────────────────────────────────
+    # TC-A-01
     @patch('controllers.auth_controller.UserModel.get_by_username',
            return_value=None)
     def test_username_vide_retourne_erreur(self, mock_get):
@@ -53,7 +53,7 @@ class TestLogin(unittest.TestCase):
         self.assertIsInstance(msg, str)
         self.assertFalse(SessionManager.is_logged_in())
 
-    # ── TC-A-02 ─────────────────────────────────────────────
+    #  TC-A-02
     @patch('controllers.auth_controller.UserModel.verify_password',
            return_value=False)
     @patch('controllers.auth_controller.UserModel.get_by_username')
@@ -74,7 +74,7 @@ class TestLogin(unittest.TestCase):
         self.assertIsInstance(msg, str)
         self.assertFalse(SessionManager.is_logged_in())
 
-    # ── TC-A-03 ─────────────────────────────────────────────
+    #  TC-A-03
     @patch('controllers.auth_controller.UserModel.get_by_username',
            return_value=None)
     def test_utilisateur_inexistant_retourne_erreur(self, mock_get):
@@ -88,7 +88,7 @@ class TestLogin(unittest.TestCase):
         self.assertIsInstance(msg, str)
         mock_get.assert_called_once_with('utilisateur_inconnu')
 
-    # ── TC-A-04 ─────────────────────────────────────────────
+    #  TC-A-04
     @patch('controllers.auth_controller.UserModel.verify_password',
            return_value=False)
     @patch('controllers.auth_controller.UserModel.get_by_username')
@@ -108,7 +108,7 @@ class TestLogin(unittest.TestCase):
         self.assertFalse(ok)
         mock_verify.assert_called_once()
 
-    # ── TC-A-05 ─────────────────────────────────────────────
+    #  TC-A-05
     @patch('controllers.auth_controller.UserModel.verify_password',
            return_value=True)
     @patch('controllers.auth_controller.UserModel.get_by_username')

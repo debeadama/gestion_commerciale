@@ -3,184 +3,140 @@
  <class>LoginDialog</class>
  <widget class="QDialog" name="LoginDialog">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>420</width>
-    <height>370</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>420</width><height>520</height></rect>
   </property>
   <property name="minimumSize">
-   <size>
-    <width>420</width>
-    <height>370</height>
-   </size>
+   <size><width>420</width><height>520</height></size>
   </property>
   <property name="maximumSize">
-   <size>
-    <width>420</width>
-    <height>370</height>
-   </size>
+   <size><width>420</width><height>520</height></size>
   </property>
   <property name="windowTitle">
-   <string>Connexion - Systeme de Gestion Commerciale</string>
+   <string>Connexion — SGC</string>
   </property>
-  <layout class="QVBoxLayout" name="main_layout">
-   <property name="spacing">
-    <number>12</number>
-   </property>
-   <property name="leftMargin">
-    <number>45</number>
-   </property>
-   <property name="topMargin">
-    <number>35</number>
-   </property>
-   <property name="rightMargin">
-    <number>45</number>
-   </property>
-   <property name="bottomMargin">
-    <number>35</number>
-   </property>
+
+  <layout class="QVBoxLayout" name="outer_layout">
+   <property name="spacing"><number>0</number></property>
+   <property name="leftMargin"><number>28</number></property>
+   <property name="topMargin"><number>20</number></property>
+   <property name="rightMargin"><number>28</number></property>
+   <property name="bottomMargin"><number>20</number></property>
+
    <item>
-    <widget class="QLabel" name="lbl_title">
-     <property name="font">
-      <font>
-       <family>Gill Sans MT</family>
-       <pointsize>20</pointsize>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Bienvenue sur votre SGC</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="lbl_subtitle">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Veuillez saisir vos paramètres pour vous connecter</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="top_spacer" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>8</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="lbl_username">
-     <property name="text">
-      <string>Nom utilisateur :</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="username_input">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>42</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>8</pointsize>
-      </font>
-     </property>
-     <property name="placeholderText">
-      <string>Entrez votre nom utilisateur</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="lbl_password">
-     <property name="text">
-      <string>Mot de passe :</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="password_input">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>42</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>8</pointsize>
-      </font>
-     </property>
-     <property name="echoMode">
-      <enum>QLineEdit::EchoMode::Password</enum>
-     </property>
-     <property name="placeholderText">
-      <string>Entrez votre mot de passe</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="login_btn">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>45</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-    background-color: #6c757d;
-    color: white;
-    border-radius: 6px;
-    padding: 6px;
-}
-</string>
-     </property>
-     <property name="text">
-      <string>Se connecter</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="error_label">
-     <property name="visible">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
+    <widget class="QFrame" name="card">
+     <property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property>
+     <layout class="QVBoxLayout" name="card_layout">
+      <property name="spacing"><number>0</number></property>
+      <property name="leftMargin"><number>36</number></property>
+      <property name="topMargin"><number>20</number></property>
+      <property name="rightMargin"><number>36</number></property>
+      <property name="bottomMargin"><number>24</number></property>
+
+      <!-- Logo -->
+      <item>
+       <widget class="QLabel" name="lbl_icon">
+        <property name="minimumSize"><size><width>0</width><height>140</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>140</height></size></property>
+        <property name="text"><string>◈</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+       </widget>
+      </item>
+
+      <!-- Espace -->
+      <item>
+       <widget class="QWidget" name="sp1" native="true">
+        <property name="minimumSize"><size><width>0</width><height>6</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>6</height></size></property>
+       </widget>
+      </item>
+
+      <!-- Nom complet -->
+      <item>
+       <widget class="QLabel" name="lbl_subtitle">
+        <property name="text"><string>Système de Gestion Commerciale</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+       </widget>
+      </item>
+
+      <!-- Espace -->
+      <item>
+       <widget class="QWidget" name="sp2" native="true">
+        <property name="minimumSize"><size><width>0</width><height>14</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>14</height></size></property>
+       </widget>
+      </item>
+
+      <!-- Titre "Connexion" -->
+      <item>
+       <widget class="QLabel" name="lbl_title">
+        <property name="text"><string>Connexion</string></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+       </widget>
+      </item>
+
+      <!-- Espace -->
+      <item>
+       <widget class="QWidget" name="sp3" native="true">
+        <property name="minimumSize"><size><width>0</width><height>14</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>14</height></size></property>
+       </widget>
+      </item>
+
+      <!-- Champ utilisateur -->
+      <item>
+       <widget class="QLineEdit" name="username_input">
+        <property name="minimumSize"><size><width>0</width><height>44</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>44</height></size></property>
+        <property name="placeholderText"><string>Nom d'utilisateur</string></property>
+       </widget>
+      </item>
+
+      <!-- Espace -->
+      <item>
+       <widget class="QWidget" name="sp4" native="true">
+        <property name="minimumSize"><size><width>0</width><height>8</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>8</height></size></property>
+       </widget>
+      </item>
+
+      <!-- Champ mot de passe -->
+      <item>
+       <widget class="QLineEdit" name="password_input">
+        <property name="minimumSize"><size><width>0</width><height>44</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>44</height></size></property>
+        <property name="echoMode"><enum>QLineEdit::EchoMode::Password</enum></property>
+        <property name="placeholderText"><string>Mot de passe</string></property>
+       </widget>
+      </item>
+
+      <!-- Erreur -->
+      <item>
+       <widget class="QLabel" name="error_label">
+        <property name="visible"><bool>false</bool></property>
+        <property name="text"><string/></property>
+        <property name="alignment"><set>Qt::AlignmentFlag::AlignCenter</set></property>
+        <property name="wordWrap"><bool>true</bool></property>
+       </widget>
+      </item>
+
+      <!-- Espace -->
+      <item>
+       <widget class="QWidget" name="sp5" native="true">
+        <property name="minimumSize"><size><width>0</width><height>10</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>10</height></size></property>
+       </widget>
+      </item>
+
+      <!-- Bouton -->
+      <item>
+       <widget class="QPushButton" name="login_btn">
+        <property name="minimumSize"><size><width>0</width><height>44</height></size></property>
+        <property name="maximumSize"><size><width>16777215</width><height>44</height></size></property>
+        <property name="text"><string>Se connecter</string></property>
+       </widget>
+      </item>
+
+     </layout>
     </widget>
    </item>
   </layout>

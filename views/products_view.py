@@ -1,17 +1,30 @@
 # views/products_view.py
 import os
-from PyQt6 import uic
-from PyQt6.QtWidgets import (
-    QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QPushButton, QMessageBox, QComboBox,
-    QTableWidget, QTableWidgetItem, QHeaderView, QDialogButtonBox,
-    QSpinBox, QDoubleSpinBox, QTextEdit, QAbstractItemView
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QColor
-from controllers.product_controller import ProductController
-from controllers.category_controller import CategoryController
+
 from controllers.auth_controller import SessionManager
+from controllers.category_controller import CategoryController
+from controllers.product_controller import ProductController
+from PyQt6 import uic
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.pagination_widget import PaginationWidget
 
 
@@ -51,7 +64,15 @@ class ProductsView(QWidget):
         self.btn_categories.clicked.connect(self._manage_categories)
         self.search_input.returnPressed.connect(self._search)
         self.filter_category.currentIndexChanged.connect(self._search)
-        self.products_table.itemSelectionChanged.connect(self._on_selection_changed)
+        # Debounce : attend 300ms apres la derniere frappe avant de chercher
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(300)
+        self._search_timer.timeout.connect(self._search)
+        self.search_input.textChanged.connect(
+            lambda: self._search_timer.start())
+        self.products_table.itemSelectionChanged.connect(
+            self._on_selection_changed)
         self.products_table.doubleClicked.connect(self._edit_product)
         # Pagination
         self._all_products = []
@@ -74,7 +95,7 @@ class ProductsView(QWidget):
         self.status_bar.setText(f"{count} produit(s) affiché(s)")
         self.pagination.reset(count)
         offset = self.pagination.current_offset()
-        limit  = self.pagination.current_limit()
+        limit = self.pagination.current_limit()
         self._populate_table(self._all_products[offset:offset + limit])
 
         # Alerte stock bas
@@ -119,8 +140,8 @@ class ProductsView(QWidget):
                 marge = 0.0
 
             stock_actuel = int(p.get('stock_actuel', 0))
-            stock_min    = int(p.get('stock_min', 0))
-            stock_ok     = stock_actuel > stock_min
+            stock_min = int(p.get('stock_min', 0))
+            stock_ok = stock_actuel > stock_min
 
             values = [
                 str(p['id']),
@@ -154,7 +175,7 @@ class ProductsView(QWidget):
         self.load_products()
 
     def _search(self):
-        term   = self.search_input.text().strip() or None
+        term = self.search_input.text().strip() or None
         cat_id = self.filter_category.currentData()
         self.load_products(term, cat_id)
 
@@ -188,9 +209,10 @@ class ProductsView(QWidget):
         if not product_id:
             return
         product = ProductController.get_by_id(product_id)
-        dialog  = ProductFormDialog(product_data=product, parent=self)
+        dialog = ProductFormDialog(product_data=product, parent=self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            success, result = ProductController.update(product_id, dialog.get_data())
+            success, result = ProductController.update(
+                product_id, dialog.get_data())
             if success:
                 self.load_products()
                 self.status_bar.setText("Produit modifie avec succès.")
@@ -217,7 +239,7 @@ class ProductsView(QWidget):
             return
         product = ProductController.get_by_id(product_id)
         user_id = SessionManager.get_current_user()['id']
-        dialog  = StockMovementDialog(product, user_id, parent=self)
+        dialog = StockMovementDialog(product, user_id, parent=self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.load_products()
             self.status_bar.setText("Mouvement de stock enregistre.")
@@ -234,37 +256,14 @@ class ProductsView(QWidget):
     def _apply_styles(self):
         self.setStyleSheet("""
             QLabel#lbl_titre {
-                font-size: 20px; font-weight: bold; color: #1e293b;
+                font-size: 18px; font-weight: bold; color: #1e293b;
             }
-            QLabel#lbl_total { font-size: 13px; color: #64748b; }
-            QLabel#status_bar { font-size: 11px; color: #64748b; padding: 4px; }
+            QLabel#lbl_total  { font-size: 11px; color: #94a3b8; }
+            QLabel#status_bar { font-size: 11px; color: #94a3b8; padding: 2px 0; }
             QLabel#lbl_alert {
                 background-color: #fef3c7; color: #92400e;
-                border: 1px solid #fcd34d; border-radius: 5px;
-                padding: 6px 12px; font-size: 12px; font-weight: bold;
-            }
-            QLineEdit, QComboBox {
-                border: 1px solid #cbd5e1; border-radius: 5px;
-                padding: 5px 10px; font-size: 13px; background: white;
-            }
-            QLineEdit:focus { border-color: #1976D2; }
-            QPushButton {
-                border: none; border-radius: 5px; padding: 5px 10px;
-                font-size: 12px; color: white; background-color: #64748b;
-            }
-            QPushButton:hover { background-color: #475569; }
-            QPushButton#btn_add { background-color: #1976D2; font-weight: bold; }
-            QPushButton#btn_add:hover { background-color: #1565C0; }
-            QPushButton:disabled { background-color: #e2e8f0; color: #94a3b8; }
-            QTableWidget {
-                border: 1px solid #e2e8f0; border-radius: 5px;
-                gridline-color: #f1f5f9; font-size: 13px; background: white;
-            }
-            QTableWidget::item:selected { background-color: #dbeafe; color: #1e293b; }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 12px; padding: 8px;
-                border: none; border-bottom: 2px solid #e2e8f0;
+                border: 1px solid #fcd34d; border-radius: 6px;
+                padding: 4px 12px; font-size: 11px; font-weight: bold;
             }
         """)
 
@@ -278,7 +277,8 @@ class ProductFormDialog(QDialog):
     def __init__(self, product_data=None, parent=None):
         super().__init__(parent)
         is_edit = product_data is not None
-        self.setWindowTitle("Modifier le produit" if is_edit else "Nouveau produit")
+        self.setWindowTitle(
+            "Modifier le produit" if is_edit else "Nouveau produit")
         self.setMinimumWidth(480)
         self.setModal(True)
         self._build_ui()
@@ -323,11 +323,11 @@ class ProductFormDialog(QDialog):
         self.stock_actuel_input.setMinimumHeight(34)
         self.stock_actuel_input.setMaximum(99999)
 
-        form.addRow("Nom *",         self.nom_input)
-        form.addRow("Catégorie",     self.category_combo)
-        form.addRow("Description",   self.description_input)
-        form.addRow("Prix achat",    self.prix_achat_input)
-        form.addRow("Prix vente *",  self.prix_vente_input)
+        form.addRow("Nom *", self.nom_input)
+        form.addRow("Catégorie", self.category_combo)
+        form.addRow("Description", self.description_input)
+        form.addRow("Prix achat", self.prix_achat_input)
+        form.addRow("Prix vente *", self.prix_vente_input)
         form.addRow("Stock minimum", self.stock_min_input)
         form.addRow("Stock initial", self.stock_actuel_input)
         layout.addLayout(form)
@@ -335,8 +335,10 @@ class ProductFormDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save |
             QDialogButtonBox.StandardButton.Cancel)
-        buttons.button(QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         buttons.accepted.connect(self._validate)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -355,7 +357,8 @@ class ProductFormDialog(QDialog):
 
     def _validate(self):
         if not self.nom_input.text().strip():
-            QMessageBox.warning(self, "Champ requis", "Le nom est obligatoire.")
+            QMessageBox.warning(
+                self, "Champ requis", "Le nom est obligatoire.")
             self.nom_input.setFocus()
             return
         if self.prix_vente_input.value() <= 0:
@@ -366,12 +369,12 @@ class ProductFormDialog(QDialog):
 
     def get_data(self):
         return {
-            'nom':          self.nom_input.text().strip(),
-            'category_id':  self.category_combo.currentData(),
-            'description':  self.description_input.toPlainText().strip(),
-            'prix_achat':   self.prix_achat_input.value(),
-            'prix_vente':   self.prix_vente_input.value(),
-            'stock_min':    self.stock_min_input.value(),
+            'nom': self.nom_input.text().strip(),
+            'category_id': self.category_combo.currentData(),
+            'description': self.description_input.toPlainText().strip(),
+            'prix_achat': self.prix_achat_input.value(),
+            'prix_vente': self.prix_vente_input.value(),
+            'stock_min': self.stock_min_input.value(),
             'stock_actuel': self.stock_actuel_input.value(),
         }
 
@@ -410,7 +413,7 @@ class StockMovementDialog(QDialog):
         self.type_combo.setMinimumHeight(34)
         self.type_combo.addItem("Entree en stock", "entree")
         self.type_combo.addItem("Sortie de stock", "sortie")
-        self.type_combo.addItem("Ajustement",      "ajustement")
+        self.type_combo.addItem("Ajustement", "ajustement")
 
         self.quantite_input = QSpinBox()
         self.quantite_input.setMinimumHeight(34)
@@ -421,27 +424,28 @@ class StockMovementDialog(QDialog):
         self.motif_input.setMinimumHeight(34)
         self.motif_input.setPlaceholderText("Motif du mouvement...")
 
-        form.addRow("Type",     self.type_combo)
+        form.addRow("Type", self.type_combo)
         form.addRow("Quantite", self.quantite_input)
-        form.addRow("Motif",    self.motif_input)
+        form.addRow("Motif", self.motif_input)
         layout.addLayout(form)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok |
             QDialogButtonBox.StandardButton.Cancel)
         buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Valider")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         buttons.accepted.connect(self._validate)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
     def _validate(self):
         success, message = ProductController.add_stock_movement(
-            product_id     = self.product['id'],
-            type_mouvement = self.type_combo.currentData(),
-            quantite       = self.quantite_input.value(),
-            motif          = self.motif_input.text().strip(),
-            user_id        = self.user_id,
+            product_id=self.product['id'],
+            type_mouvement=self.type_combo.currentData(),
+            quantite=self.quantite_input.value(),
+            motif=self.motif_input.text().strip(),
+            user_id=self.user_id,
         )
         if success:
             self.accept()
@@ -498,7 +502,8 @@ class CategoriesDialog(QDialog):
         self.cat_table.setColumnCount(2)
         self.cat_table.setHorizontalHeaderLabels(["ID", "Nom"])
         self.cat_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.cat_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.cat_table.setSelectionBehavior(
+            QTableWidget.SelectionBehavior.SelectRows)
         self.cat_table.verticalHeader().setVisible(False)
         self.cat_table.horizontalHeader().setStretchLastSection(True)
         self.cat_table.setColumnHidden(0, True)

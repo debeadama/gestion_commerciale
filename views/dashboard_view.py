@@ -1,13 +1,19 @@
 # views/dashboard_view.py
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QFrame, QTableWidget, QTableWidgetItem, QSizePolicy
-)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont, QColor
-from controllers.sale_controller import SaleController
 from controllers.client_controller import ClientController
 from controllers.product_controller import ProductController
+from controllers.sale_controller import SaleController
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class DashboardView(QWidget):
@@ -51,10 +57,17 @@ class DashboardView(QWidget):
         # Cartes ligne 1
         cards1 = QHBoxLayout()
         cards1.setSpacing(15)
-        self.card_ca       = self._make_card("Chiffre d'Affaires", "0.00", "#1976D2", "Total ventes payees")
-        self.card_ventes   = self._make_card("Ventes du jour",     "0",    "#059669", "Aujourd'hui")
-        self.card_clients  = self._make_card("Clients",            "0",    "#7c3aed", "Total clients")
-        self.card_produits = self._make_card("Produits",           "0",    "#d97706", "En catalogue")
+        self.card_ca = self._make_card(
+            "Chiffre d'Affaires",
+            "0.00",
+            "#1976D2",
+            "Total ventes payees")
+        self.card_ventes = self._make_card(
+            "Ventes du jour", "0", "#059669", "Aujourd'hui")
+        self.card_clients = self._make_card(
+            "Clients", "0", "#7c3aed", "Total clients")
+        self.card_produits = self._make_card(
+            "Produits", "0", "#d97706", "En catalogue")
         for c in [self.card_ca, self.card_ventes,
                   self.card_clients, self.card_produits]:
             cards1.addWidget(c['frame'])
@@ -63,10 +76,14 @@ class DashboardView(QWidget):
         # Cartes ligne 2
         cards2 = QHBoxLayout()
         cards2.setSpacing(15)
-        self.card_impaye    = self._make_card("Montant Impaye",  "0.00", "#dc2626", "Ventes non soldees")
-        self.card_stock_bas = self._make_card("Alertes Stock",   "0",    "#ea580c", "Produits en rupture")
-        self.card_mois      = self._make_card("Ventes ce mois",  "0",    "#0891b2", "Ce mois-ci")
-        self.card_panier    = self._make_card("Panier Moyen",    "0.00", "#65a30d", "Par vente")
+        self.card_impaye = self._make_card(
+            "Montant Impaye", "0.00", "#dc2626", "Ventes non soldees")
+        self.card_stock_bas = self._make_card(
+            "Alertes Stock", "0", "#ea580c", "Produits en rupture")
+        self.card_mois = self._make_card(
+            "Ventes ce mois", "0", "#0891b2", "Ce mois-ci")
+        self.card_panier = self._make_card(
+            "Panier Moyen", "0.00", "#65a30d", "Par vente")
         for c in [self.card_impaye, self.card_stock_bas,
                   self.card_mois, self.card_panier]:
             cards2.addWidget(c['frame'])
@@ -153,7 +170,7 @@ class DashboardView(QWidget):
     def refresh(self):
         from datetime import datetime
         self.lbl_date.setText(
-            datetime.now().strftime("Mise a jour : %d/%m/%Y %H:%M"))
+            datetime.now().strftime("Mis a jour a %H:%M:%S le %d/%m/%Y"))
         self._load_kpis()
         self._load_recent_sales()
         self._load_low_stock()
@@ -174,7 +191,8 @@ class DashboardView(QWidget):
 
         # Stats clients
         clients = ClientController.get_all()
-        self.card_clients['valeur'].setText(str(len(clients) if clients else 0))
+        self.card_clients['valeur'].setText(
+            str(len(clients) if clients else 0))
 
         # Stats produits
         prod_stats = ProductController.get_dashboard_stats()
@@ -188,8 +206,8 @@ class DashboardView(QWidget):
     def _load_recent_sales(self):
         sales = SaleController.get_recent(8)
         statut_colors = {
-            'payee':    '#16a34a', 'partielle': '#d97706',
-            'en_cours': '#1976D2', 'annulee':   '#dc2626',
+            'payee': '#16a34a', 'partielle': '#d97706',
+            'en_cours': '#1976D2', 'annulee': '#dc2626',
         }
         self.recent_table.setRowCount(0)
         for row_idx, s in enumerate(sales or []):
@@ -208,7 +226,9 @@ class DashboardView(QWidget):
                 if col == 4:
                     item.setForeground(
                         QColor(statut_colors.get(statut, '#64748b')))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 self.recent_table.setItem(row_idx, col, item)
         self.recent_table.resizeColumnsToContents()
 
@@ -225,7 +245,9 @@ class DashboardView(QWidget):
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 if col == 1:
                     item.setForeground(QColor('#dc2626'))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 self.stock_table.setItem(row_idx, col, item)
         if not products:
             self.stock_table.insertRow(0)
@@ -242,23 +264,13 @@ class DashboardView(QWidget):
     def _apply_styles(self):
         self.setStyleSheet("""
             QFrame#kpi_card {
-                background-color: white; border: 1px solid #e2e8f0;
-                border-radius: 8px;
+                background-color: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
             }
             QFrame#bottom_frame {
-                background-color: white; border: 1px solid #e2e8f0;
-                border-radius: 8px;
-            }
-            QTableWidget {
-                border: none; font-size: 12px;
-                background: white; gridline-color: #f1f5f9;
-            }
-            QTableWidget::item:selected {
-                background-color: #dbeafe; color: #1e293b;
-            }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 11px; padding: 6px;
-                border: none; border-bottom: 2px solid #e2e8f0;
+                background-color: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
             }
         """)

@@ -8,6 +8,15 @@ Logique metier pour la gestion des ventes et des paiements.
 import logging
 
 from controllers.auth_controller import SessionManager
+from controllers.exceptions import (
+    EntiteIntrouvableError,
+    PermissionRefuseeError,
+    StockInsuffisantError,
+    ValidationError,
+    VenteAnnuleeError,
+    VenteDejaPayeeError,
+    VentePayeeNonAnnulableError,
+)
 from models.product import ProductModel
 from models.sale import SaleModel
 
@@ -98,23 +107,29 @@ class SaleController:
         if not panier:
             return False, "Le panier est vide."
 
-        for ligne in panier:
-            produit = ProductModel.get_by_id(ligne['produit_id'])
-            if not produit:
-                return False, (
-                    f"Produit ID {ligne['produit_id']} introuvable."
-                )
-            if produit['stock_actuel'] < ligne['quantite']:
-                return False, (
-                    f"Stock insuffisant pour '{produit['nom']}'. "
-                    f"Disponible : {produit['stock_actuel']}, "
-                    f"demande : {ligne['quantite']}."
-                )
+        try:
+            for ligne in panier:
+                produit = ProductModel.get_by_id(ligne['produit_id'])
+                if not produit:
+                    raise EntiteIntrouvableError(
+                        f"Produit ID {ligne['produit_id']} introuvable."
+                    )
+                if produit['stock_actuel'] < ligne['quantite']:
+                    raise StockInsuffisantError(
+                        f"Stock insuffisant pour '{produit['nom']}'. "
+                        f"Disponible : {produit['stock_actuel']}, "
+                        f"demande : {ligne['quantite']}."
+                    )
+        except (EntiteIntrouvableError, StockInsuffisantError) as e:
+            return False, str(e)
 
         montant_total = sum(
             float(ligne['quantite']) * float(ligne['prix_unitaire'])
             for ligne in panier
         )
+
+        montant_paye = round(float(montant_paye), 2)
+        montant_total = round(montant_total, 2)
 
         if montant_paye < 0:
             return False, "Le montant paye ne peut pas etre negatif."
@@ -171,12 +186,16 @@ class SaleController:
         """
         vente = SaleModel.get_by_id(sale_id)
         if not vente:
-            return False, "Vente introuvable."
+            return False, str(EntiteIntrouvableError("Vente introuvable."))
 
-        if vente['statut'] in ('payee', 'annulee'):
-            return False, (
-                f"Impossible : la vente est deja '{vente['statut']}'."
-            )
+        if vente['statut'] == 'payee':
+            return False, str(VenteDejaPayeeError(
+                "Impossible : la vente est deja 'payee'."
+            ))
+        if vente['statut'] == 'annulee':
+            return False, str(VenteAnnuleeError(
+                "Impossible : la vente est deja 'annulee'."
+            ))
 
         reste = float(vente['montant_reste'])
         if montant <= 0:
@@ -217,11 +236,13 @@ class SaleController:
             tuple: (True, message) ou (False, message_erreur).
         """
         if not SessionManager.has_permission('view_reports'):
-            return False, "Permission insuffisante pour valider une vente."
+            return False, str(PermissionRefuseeError(
+                "Permission insuffisante pour valider une vente."
+            ))
 
         vente = SaleModel.get_by_id(sale_id)
         if not vente:
-            return False, "Vente introuvable."
+            return False, str(EntiteIntrouvableError("Vente introuvable."))
         if vente['statut'] not in ('en_cours', 'partielle'):
             return False, (
                 "Seules les ventes en cours ou partielles "

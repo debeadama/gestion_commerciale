@@ -78,7 +78,7 @@ class UserController:
         if len(password) < 6:
             return (
                 False,
-                "Le mot de passe doit contenir au moins 6 caracteres."
+                "Le mot de passe doit contenir au moins 6 caractères."
             )
 
         hashed = bcrypt.hashpw(

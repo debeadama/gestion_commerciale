@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 CACHE_CATEGORIES = 'product_categories'
 CACHE_LOW_STOCK = 'product_low_stock'
+CACHE_ALL_PRODUCTS = 'product_all'
 CACHE_TTL = 300  # 5 minutes
 
 
@@ -28,6 +29,7 @@ class ProductController:
     def get_all(search: str = None, category_id: int = None) -> list:
         """
         Retourne tous les produits avec filtres optionnels.
+        Met en cache la liste complete (sans filtre) pendant 5 minutes.
 
         Args:
             search (str): Terme de recherche sur le nom ou la description.
@@ -36,6 +38,13 @@ class ProductController:
         Returns:
             list: Liste des produits ou liste vide.
         """
+        if search is None and category_id is None:
+            cached = app_cache.get(CACHE_ALL_PRODUCTS)
+            if cached is not None:
+                return cached
+            result = ProductModel.get_all(None, None) or []
+            app_cache.set(CACHE_ALL_PRODUCTS, result, CACHE_TTL)
+            return result
         return ProductModel.get_all(search, category_id) or []
 
     @staticmethod
@@ -121,6 +130,7 @@ class ProductController:
         try:
             pid = ProductModel.create(data)
             app_cache.invalidate(CACHE_LOW_STOCK)
+            app_cache.invalidate(CACHE_ALL_PRODUCTS)
             logger.info(f"Produit cree : {nom} (ID: {pid})")
             return True, pid
         except Exception as e:
@@ -145,6 +155,7 @@ class ProductController:
         try:
             ProductModel.update(product_id, data)
             app_cache.invalidate(CACHE_LOW_STOCK)
+            app_cache.invalidate(CACHE_ALL_PRODUCTS)
             return True, "Produit mis a jour."
         except Exception as e:
             return False, str(e)
@@ -163,6 +174,7 @@ class ProductController:
         try:
             ProductModel.delete(product_id)
             app_cache.invalidate(CACHE_LOW_STOCK)
+            app_cache.invalidate(CACHE_ALL_PRODUCTS)
             return True, "Produit supprime."
         except ValueError as e:
             return False, str(e)
@@ -224,6 +236,7 @@ class ProductController:
                 new_stock,
             )
             app_cache.invalidate(CACHE_LOW_STOCK)
+            app_cache.invalidate(CACHE_ALL_PRODUCTS)
             logger.info(
                 f"Mouvement stock : {type_mouvement} {quantite} "
                 f"pour produit {product_id}"

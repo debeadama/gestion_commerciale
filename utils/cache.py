@@ -3,8 +3,8 @@
 Cache memoire simple pour les donnees statiques.
 Evite de recharger categories et parametres a chaque appel.
 """
-import time
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +52,8 @@ class SimpleCache:
     def stats(self) -> dict:
         """Retourne des statistiques sur le cache."""
         now = time.time()
-        actives  = sum(1 for _, (_, exp) in self._store.items() if exp > now)
-        expires  = sum(1 for _, (_, exp) in self._store.items() if exp <= now)
+        actives = sum(1 for _, (_, exp) in self._store.items() if exp > now)
+        expires = sum(1 for _, (_, exp) in self._store.items() if exp <= now)
         return {'total': len(self._store),
                 'actives': actives, 'expires': expires}
 

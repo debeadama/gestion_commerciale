@@ -2,19 +2,32 @@
 import os
 import subprocess
 from datetime import datetime
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QPushButton, QFrame, QTabWidget,
-    QTableWidget, QTableWidgetItem, QComboBox, QMessageBox,
-    QFileDialog, QDialog, QDialogButtonBox, QSpinBox,
-    QDoubleSpinBox, QHeaderView, QSizePolicy
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QColor, QPixmap
-from database.connection import db
+
 from controllers.auth_controller import SessionManager
 from controllers.user_controller import UserController
-
+from database.connection import db
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QFont, QPixmap
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 def _confirm(parent, title, message):
@@ -26,6 +39,7 @@ def _confirm(parent, title, message):
     box.addButton("Non", QMessageBox.ButtonRole.NoRole)
     box.exec()
     return box.clickedButton() == btn_oui
+
 
 class SettingsView(QWidget):
     """Module Paramètres — admin uniquement."""
@@ -69,8 +83,7 @@ class SettingsView(QWidget):
                 "  ip_address VARCHAR(45),"
                 "  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,"
                 "  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL"
-                ")"
-            )
+                ")")
         except Exception:
             pass
 
@@ -121,55 +134,20 @@ class SettingsView(QWidget):
 
     def _apply_styles(self):
         self.setStyleSheet("""
-            QTabWidget#settings_tabs::pane {
-                border: 1px solid #e2e8f0; border-radius: 8px;
-                background: white;
-            }
-            QTabWidget#settings_tabs QTabBar::tab {
-                background: #f1f5f9; color: #64748b;
-                padding: 9px 20px; border: none;
-                border-bottom: 2px solid transparent;
-                font-size: 12px; font-weight: bold;
-            }
-            QTabWidget#settings_tabs QTabBar::tab:selected {
-                color: #1976D2; border-bottom: 2px solid #1976D2;
-                background: white;
-            }
-            QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
-                border: 1px solid #cbd5e1; border-radius: 5px;
-                padding: 6px 10px; font-size: 13px; background: white;
-                min-height: 34px;
-            }
-            QLineEdit:focus { border-color: #1976D2; }
-            QPushButton {
-                border: none; border-radius: 5px; padding: 7px 16px;
-                font-size: 12px; color: white; background-color: #64748b;
-            }
-            QPushButton:hover { background-color: #475569; }
             QPushButton#btn_primary {
-                background-color: #1976D2; font-weight: bold;
+                background-color: #1976D2; color: white; font-weight: bold;
             }
             QPushButton#btn_primary:hover { background-color: #1565C0; }
-            QPushButton#btn_danger { background-color: #dc2626; }
-            QPushButton#btn_danger:hover { background-color: #b91c1c; }
-            QPushButton#btn_success { background-color: #16a34a; }
-            QPushButton#btn_success:hover { background-color: #15803d; }
-            QTableWidget {
-                border: 1px solid #e2e8f0; border-radius: 5px;
-                font-size: 12px; background: white;
-                gridline-color: #f1f5f9;
+            QPushButton#btn_danger {
+                background-color: #fee2e2; color: #dc2626;
             }
-            QTableWidget::item:selected {
-                background-color: #dbeafe; color: #1e293b;
+            QPushButton#btn_danger:hover { background-color: #fecaca; }
+            QPushButton#btn_success {
+                background-color: #dcfce7; color: #16a34a;
             }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 11px; padding: 7px;
-                border: none; border-bottom: 2px solid #e2e8f0;
-            }
+            QPushButton#btn_success:hover { background-color: #bbf7d0; }
             QLabel#section_title {
-                font-size: 13px; font-weight: bold; color: #1e293b;
-                margin-top: 5px;
+                font-size: 12px; font-weight: bold; color: #1e293b;
             }
         """)
 
@@ -218,21 +196,21 @@ class CompanyTab(QWidget):
         form.setSpacing(12)
         form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.nom_input     = QLineEdit()
+        self.nom_input = QLineEdit()
         self.adresse_input = QLineEdit()
-        self.tel_input     = QLineEdit()
-        self.email_input   = QLineEdit()
-        self.site_input    = QLineEdit()
-        self.rc_input      = QLineEdit()
-        self.nif_input     = QLineEdit()
+        self.tel_input = QLineEdit()
+        self.email_input = QLineEdit()
+        self.site_input = QLineEdit()
+        self.rc_input = QLineEdit()
+        self.nif_input = QLineEdit()
 
-        form.addRow("Nom entreprise *",  self.nom_input)
-        form.addRow("Adresse",           self.adresse_input)
-        form.addRow("Telephone",         self.tel_input)
-        form.addRow("Email",             self.email_input)
-        form.addRow("Site web",          self.site_input)
+        form.addRow("Nom entreprise *", self.nom_input)
+        form.addRow("Adresse", self.adresse_input)
+        form.addRow("Telephone", self.tel_input)
+        form.addRow("Email", self.email_input)
+        form.addRow("Site web", self.site_input)
         form.addRow("Registre Commerce", self.rc_input)
-        form.addRow("N Identification",  self.nif_input)
+        form.addRow("N Identification", self.nif_input)
         layout.addLayout(form)
 
         btn_save = QPushButton("Enregistrer")
@@ -285,13 +263,13 @@ class CompanyTab(QWidget):
                                 "Le nom de l'entreprise est obligatoire.")
             return
         fields = {
-            'nom_entreprise':    self.nom_input.text().strip(),
-            'adresse':           self.adresse_input.text().strip(),
-            'telephone':         self.tel_input.text().strip(),
-            'email':             self.email_input.text().strip(),
-            'site_web':          self.site_input.text().strip(),
+            'nom_entreprise': self.nom_input.text().strip(),
+            'adresse': self.adresse_input.text().strip(),
+            'telephone': self.tel_input.text().strip(),
+            'email': self.email_input.text().strip(),
+            'site_web': self.site_input.text().strip(),
             'registre_commerce': self.rc_input.text().strip(),
-            'nif':               self.nif_input.text().strip(),
+            'nif': self.nif_input.text().strip(),
         }
         if self.logo_path:
             fields['logo_path'] = self.logo_path
@@ -328,14 +306,14 @@ class UsersTab(QWidget):
         layout.addWidget(lbl)
 
         toolbar = QHBoxLayout()
-        self.btn_add  = QPushButton("+ Nouvel utilisateur")
+        self.btn_add = QPushButton("+ Nouvel utilisateur")
         self.btn_add.setObjectName("btn_primary")
         self.btn_edit = QPushButton("Modifier")
         self.btn_edit.setEnabled(False)
-        self.btn_del  = QPushButton("Supprimer")
+        self.btn_del = QPushButton("Supprimer")
         self.btn_del.setObjectName("btn_danger")
         self.btn_del.setEnabled(False)
-        self.btn_pwd  = QPushButton("Changer mot de passe")
+        self.btn_pwd = QPushButton("Changer mot de passe")
         self.btn_pwd.setEnabled(False)
         toolbar.addWidget(self.btn_add)
         toolbar.addWidget(self.btn_edit)
@@ -349,7 +327,8 @@ class UsersTab(QWidget):
         self.table.setHorizontalHeaderLabels(
             ["ID", "Nom utilisateur", "Nom complet", "Email", "Role", "Date creation"])
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.table.setSelectionBehavior(
+            QTableWidget.SelectionBehavior.SelectRows)
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
@@ -366,7 +345,7 @@ class UsersTab(QWidget):
         users = UserController.get_all()
         self.table.setRowCount(0)
         role_colors = {
-            'admin':   '#1976D2',
+            'admin': '#1976D2',
             'manager': '#059669',
             'vendeur': '#d97706'
         }
@@ -412,11 +391,11 @@ class UsersTab(QWidget):
         if dlg.exec() == QDialog.DialogCode.Accepted:
             data = dlg.get_data()
             success, result = UserController.create(
-                username    = data['username'],
-                password    = data['password'],
-                role        = data['role'],
-                nom_complet = data.get('nom_complet', ''),
-                email       = data.get('email', ''),
+                username=data['username'],
+                password=data['password'],
+                role=data['role'],
+                nom_complet=data.get('nom_complet', ''),
+                email=data.get('email', ''),
             )
             if success:
                 self.load()
@@ -429,15 +408,15 @@ class UsersTab(QWidget):
         if not uid:
             return
         user = UserController.get_by_id(uid)
-        dlg  = UserFormDialog(user_data=user, parent=self)
+        dlg = UserFormDialog(user_data=user, parent=self)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            data    = dlg.get_data()
+            data = dlg.get_data()
             success, result = UserController.update(
-                user_id     = uid,
-                username    = data['username'],
-                role        = data['role'],
-                nom_complet = data.get('nom_complet', ''),
-                email       = data.get('email', ''),
+                user_id=uid,
+                username=data['username'],
+                role=data['role'],
+                nom_complet=data.get('nom_complet', ''),
+                email=data.get('email', ''),
             )
             if success:
                 self.load()
@@ -451,8 +430,10 @@ class UsersTab(QWidget):
             return
         current = SessionManager.get_current_user()
         if uid == current['id']:
-            QMessageBox.warning(self, "Impossible",
-                                "Vous ne pouvez pas supprimer votre propre compte.")
+            QMessageBox.warning(
+                self,
+                "Impossible",
+                "Vous ne pouvez pas supprimer votre propre compte.")
             return
         if _confirm(self, "Confirmation", "Supprimer cet utilisateur ?"):
             success, message = UserController.delete(uid)
@@ -512,9 +493,9 @@ class GeneralTab(QWidget):
         self.decimales_input.setValue(2)
         self.decimales_input.setFixedWidth(80)
 
-        form.addRow("Devise",            self.devise_input)
-        form.addRow("Taux TVA",          self.tva_input)
-        form.addRow("Format factures",   self.format_combo)
+        form.addRow("Devise", self.devise_input)
+        form.addRow("Taux TVA", self.tva_input)
+        form.addRow("Format factures", self.format_combo)
         form.addRow("Nb decimales prix", self.decimales_input)
         layout.addLayout(form)
 
@@ -550,10 +531,10 @@ class GeneralTab(QWidget):
 
     def save(self):
         fields = {
-            'devise':         self.devise_input.text().strip() or 'FCFA',
-            'tva':            str(self.tva_input.value()),
+            'devise': self.devise_input.text().strip() or 'FCFA',
+            'tva': str(self.tva_input.value()),
             'format_facture': self.format_combo.currentText(),
-            'nb_decimales':   str(self.decimales_input.value()),
+            'nb_decimales': str(self.decimales_input.value()),
         }
         try:
             for cle, valeur in fields.items():
@@ -609,7 +590,8 @@ class BackupTab(QWidget):
         sv.addWidget(btn_backup)
 
         self.lbl_backup_status = QLabel("")
-        self.lbl_backup_status.setStyleSheet("color: #16a34a; font-size: 11px;")
+        self.lbl_backup_status.setStyleSheet(
+            "color: #16a34a; font-size: 11px;")
         sv.addWidget(self.lbl_backup_status)
         layout.addWidget(save_frame)
 
@@ -663,14 +645,20 @@ class BackupTab(QWidget):
                 result = subprocess.run(cmd, stdout=f,
                                         stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
-                self.lbl_backup_status.setText(f"Sauvegarde reussie : {filepath}")
+                self.lbl_backup_status.setText(
+                    f"Sauvegarde reussie : {filepath}")
                 self.lbl_backup_status.setStyleSheet(
                     "color: #16a34a; font-size: 11px;")
-                _log_action("sauvegarde", "Sauvegarde base de données effectuee")
+                _log_action("sauvegarde",
+                            "Sauvegarde base de données effectuee")
             else:
                 raise Exception(result.stderr)
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Sauvegarde echouee :\n{str(e)}")
+            QMessageBox.critical(
+                self,
+                "Erreur",
+                f"Sauvegarde echouee :\n{
+                    str(e)}")
             self.lbl_backup_status.setText("Échec de la sauvegarde.")
             self.lbl_backup_status.setStyleSheet(
                 "color: #dc2626; font-size: 11px;")
@@ -697,8 +685,8 @@ class BackupTab(QWidget):
                 self.lbl_restore_status.setStyleSheet(
                     "color: #16a34a; font-size: 11px;")
                 _log_action("restauration", f"Restauration depuis {filepath}")
-                QMessageBox.information(self, "Succes",
-                                        "Base de données restauree avec succès.")
+                QMessageBox.information(
+                    self, "Succes", "Base de données restauree avec succès.")
             else:
                 raise Exception(result.stderr)
         except Exception as e:
@@ -710,7 +698,7 @@ class BackupTab(QWidget):
 
 
 # ──────────────────────────────────────────────────────────────
-# Onglet Journal d'activite'# ──────────────────────────────────────────────────────────────
+# Onglet Journal d'activite'# ────────────────────────────────────────────
 
 class LogsTab(QWidget):
 
@@ -763,11 +751,11 @@ class LogsTab(QWidget):
 
         self.table.setRowCount(0)
         action_colors = {
-            'connexion':    '#16a34a',
-            'deconnexion':  '#64748b',
-            'sauvegarde':   '#1976D2',
+            'connexion': '#16a34a',
+            'deconnexion': '#64748b',
+            'sauvegarde': '#1976D2',
             'restauration': '#dc2626',
-            'erreur':       '#dc2626',
+            'erreur': '#dc2626',
         }
         for i, log in enumerate(logs or []):
             self.table.insertRow(i)
@@ -779,7 +767,9 @@ class LogsTab(QWidget):
                 if hasattr(raw_date, 'strftime'):
                     date_str = raw_date.strftime('%d-%m-%Y %H:%M:%S')
                 else:
-                    date_str = _dt.strptime(str(raw_date)[:19], '%Y-%m-%d %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
+                    date_str = _dt.strptime(
+                        str(raw_date)[
+                            :19], '%Y-%m-%d %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
             except Exception:
                 date_str = str(raw_date)[:19]
             vals = [
@@ -810,7 +800,10 @@ class LogsTab(QWidget):
         self.table.resizeColumnsToContents()
 
     def _clear_logs(self):
-        if _confirm(self, "Confirmation", "Effacer tout le journal d'activite ?"):
+        if _confirm(
+            self,
+            "Confirmation",
+                "Effacer tout le journal d'activite ?"):
             try:
                 db.execute_update("DELETE FROM logs")
                 self.load()
@@ -843,37 +836,41 @@ class UserFormDialog(QDialog):
         form = QFormLayout()
         form.setSpacing(10)
 
-        self.username_input    = QLineEdit()
+        self.username_input = QLineEdit()
         self.nom_complet_input = QLineEdit()
-        self.email_dlg_input   = QLineEdit()
+        self.email_dlg_input = QLineEdit()
         self.email_dlg_input.setPlaceholderText("exemple@email.com")
-        self.role_combo        = QComboBox()
+        self.role_combo = QComboBox()
         self.role_combo.addItems(['vendeur', 'manager', 'admin'])
 
-        for w in [self.username_input, self.nom_complet_input, self.email_dlg_input]:
+        for w in [
+                self.username_input,
+                self.nom_complet_input,
+                self.email_dlg_input]:
             w.setMinimumHeight(34)
 
         form.addRow("Nom utilisateur *", self.username_input)
-        form.addRow("Nom complet",       self.nom_complet_input)
-        form.addRow("Email",             self.email_dlg_input)
-        form.addRow("Role",              self.role_combo)
+        form.addRow("Nom complet", self.nom_complet_input)
+        form.addRow("Email", self.email_dlg_input)
+        form.addRow("Role", self.role_combo)
 
         if not self.is_edit:
-            self.password_input  = QLineEdit()
+            self.password_input = QLineEdit()
             self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
             self.password_input.setMinimumHeight(34)
             self.password2_input = QLineEdit()
             self.password2_input.setEchoMode(QLineEdit.EchoMode.Password)
             self.password2_input.setMinimumHeight(34)
             form.addRow("Mot de passe *", self.password_input)
-            form.addRow("Confirmer *",    self.password2_input)
+            form.addRow("Confirmer *", self.password2_input)
 
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save |
             QDialogButtonBox.StandardButton.Cancel)
-        btns.button(QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
+        btns.button(QDialogButtonBox.StandardButton.Save).setText(
+            "Enregistrer")
         btns.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         btns.accepted.connect(self._validate)
         btns.rejected.connect(self.reject)
@@ -905,10 +902,10 @@ class UserFormDialog(QDialog):
 
     def get_data(self):
         data = {
-            'username':    self.username_input.text().strip(),
+            'username': self.username_input.text().strip(),
             'nom_complet': self.nom_complet_input.text().strip(),
-            'email':       self.email_dlg_input.text().strip(),
-            'role':        self.role_combo.currentText(),
+            'email': self.email_dlg_input.text().strip(),
+            'role': self.role_combo.currentText(),
         }
         if not self.is_edit:
             data['password'] = self.password_input.text()
@@ -932,20 +929,21 @@ class ChangePasswordDialog(QDialog):
 
         form = QFormLayout()
         form.setSpacing(10)
-        self.new_pwd  = QLineEdit()
+        self.new_pwd = QLineEdit()
         self.new_pwd.setEchoMode(QLineEdit.EchoMode.Password)
         self.new_pwd.setMinimumHeight(34)
         self.conf_pwd = QLineEdit()
         self.conf_pwd.setEchoMode(QLineEdit.EchoMode.Password)
         self.conf_pwd.setMinimumHeight(34)
         form.addRow("Nouveau mot de passe *", self.new_pwd)
-        form.addRow("Confirmer *",            self.conf_pwd)
+        form.addRow("Confirmer *", self.conf_pwd)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save |
             QDialogButtonBox.StandardButton.Cancel)
-        btns.button(QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
+        btns.button(QDialogButtonBox.StandardButton.Save).setText(
+            "Enregistrer")
         btns.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         btns.accepted.connect(self._validate)
         btns.rejected.connect(self.reject)

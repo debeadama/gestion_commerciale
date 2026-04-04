@@ -1,23 +1,35 @@
 # views/clients_view.py
 import os
 from datetime import datetime as dt
-from PyQt6 import uic
-from PyQt6.QtWidgets import (
-    QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QPushButton, QMessageBox, QFrame,
-    QTableWidget, QTableWidgetItem, QHeaderView, QDialogButtonBox,
-    QFileDialog
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QColor
+
 from controllers.client_controller import ClientController
+from PyQt6 import uic
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.pagination_widget import PaginationWidget
-#from controllers.auth_controller import SessionManager
 
 
-# ══════════════════════════════════════════════════════════════
+
+
+
 # Vue principale Clients
-# ══════════════════════════════════════════════════════════════
+
 
 
 def _confirm(parent, title, message):
@@ -29,6 +41,7 @@ def _confirm(parent, title, message):
     box.addButton("Non", QMessageBox.ButtonRole.NoRole)
     box.exec()
     return box.clickedButton() == btn_oui
+
 
 class ClientsView(QWidget):
 
@@ -50,7 +63,15 @@ class ClientsView(QWidget):
         self.btn_search.clicked.connect(self._search)
         self.btn_reset.clicked.connect(self._reset)
         self.search_input.returnPressed.connect(self._search)
-        self.clients_table.itemSelectionChanged.connect(self._on_selection_changed)
+        # Debounce : attend 300ms apres la derniere frappe avant de chercher
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(300)
+        self._search_timer.timeout.connect(self._search)
+        self.search_input.textChanged.connect(
+            lambda: self._search_timer.start())
+        self.clients_table.itemSelectionChanged.connect(
+            self._on_selection_changed)
         self.clients_table.doubleClicked.connect(self._edit_client)
         if hasattr(self, 'btn_export_excel'):
             self.btn_export_excel.clicked.connect(self._export_excel)
@@ -74,7 +95,7 @@ class ClientsView(QWidget):
         if hasattr(self, 'pagination'):
             self.pagination.reset(count)
             offset = self.pagination.current_offset()
-            limit  = self.pagination.current_limit()
+            limit = self.pagination.current_limit()
         else:
             offset, limit = 0, 50
         self._populate_table(self._all_clients[offset:offset + limit])
@@ -111,7 +132,8 @@ class ClientsView(QWidget):
 
         self.clients_table.resizeColumnsToContents()
         if hasattr(self, 'status_bar'):
-            self.status_bar.setText(f"{len(clients or [])} client(s) affiché(s)")
+            self.status_bar.setText(
+                f"{len(clients or [])} client(s) affiché(s)")
 
     #   Recherche
 
@@ -148,7 +170,8 @@ class ClientsView(QWidget):
             success, result = ClientController.create(dialog.get_data())
             if success:
                 self.load_clients()
-                QMessageBox.information(self, "Succes", "Client ajoute avec succès.")
+                QMessageBox.information(
+                    self, "Succes", "Client ajoute avec succès.")
             else:
                 QMessageBox.critical(self, "Erreur", result)
 
@@ -161,10 +184,12 @@ class ClientsView(QWidget):
             return
         dialog = ClientFormDialog(client_data=client, parent=self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            success, result = ClientController.update(client_id, dialog.get_data())
+            success, result = ClientController.update(
+                client_id, dialog.get_data())
             if success:
                 self.load_clients()
-                QMessageBox.information(self, "Succes", "Client modifie avec succès.")
+                QMessageBox.information(
+                    self, "Succes", "Client modifie avec succès.")
             else:
                 QMessageBox.critical(self, "Erreur", result)
 
@@ -172,10 +197,13 @@ class ClientsView(QWidget):
         client_id = self._get_selected_id()
         if not client_id:
             return
-        row    = self.clients_table.currentRow()
-        nom    = self.clients_table.item(row, 1).text()
+        row = self.clients_table.currentRow()
+        nom = self.clients_table.item(row, 1).text()
         prenom = self.clients_table.item(row, 2).text()
-        if _confirm(self, "Confirmation", f"Supprimér le client {nom} {prenom} ?"):
+        if _confirm(
+            self,
+            "Confirmation",
+                f"Supprimér le client {nom} {prenom} ?"):
             success, message = ClientController.delete(client_id)
             if success:
                 self.load_clients()
@@ -187,18 +215,22 @@ class ClientsView(QWidget):
         client_id = self._get_selected_id()
         if not client_id:
             return
-        row    = self.clients_table.currentRow()
-        nom    = self.clients_table.item(row, 1).text()
+        row = self.clients_table.currentRow()
+        nom = self.clients_table.item(row, 1).text()
         prenom = self.clients_table.item(row, 2).text()
         history = ClientController.get_purchase_history(client_id)
-        stats   = ClientController.get_stats(client_id)
-        PurchaseHistoryDialog(f"{nom} {prenom}", history, stats, parent=self).exec()
+        stats = ClientController.get_stats(client_id)
+        PurchaseHistoryDialog(
+            f"{nom} {prenom}",
+            history,
+            stats,
+            parent=self).exec()
 
     #  Export Excel
 
     def _export_excel(self):
         import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.styles import Alignment, Font, PatternFill
 
         filepath, _ = QFileDialog.getSaveFileName(
             self, "Exporter Excel",
@@ -213,14 +245,15 @@ class ClientsView(QWidget):
             ws.title = "Clients"
             headers = ["Nom", "Prenom", "Telephone", "Email",
                        "Ville", "CA Total", "Dernière visite"]
-            dark  = PatternFill("solid", fgColor="1e293b")
+            dark = PatternFill("solid", fgColor="1e293b")
             light = PatternFill("solid", fgColor="f1f5f9")
 
             for ci, h in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=ci, value=h)
                 cell.fill = dark
                 cell.font = Font(color="FFFFFF", bold=True, size=10)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.alignment = Alignment(
+                    horizontal="center", vertical="center")
             ws.row_dimensions[1].height = 22
 
             for ri, row in enumerate(clients or [], 2):
@@ -251,13 +284,20 @@ class ClientsView(QWidget):
     #  Export PDF
 
     def _export_pdf(self):
-        from reportlab.lib.pagesizes import A4, landscape
-        from reportlab.lib import colors
-        from reportlab.lib.units import cm
-        from reportlab.platypus import (SimpleDocTemplate, Table,
-                                        TableStyle, Paragraph, Spacer, HRFlowable)
-        from reportlab.lib.styles import ParagraphStyle
         from datetime import datetime as _dt
+
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.lib.units import cm
+        from reportlab.platypus import (
+            HRFlowable,
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
 
         filepath, _ = QFileDialog.getSaveFileName(
             self, "Exporter PDF",
@@ -267,41 +307,42 @@ class ClientsView(QWidget):
             return
         try:
             clients = ClientController.get_export_data()
-            DARK  = colors.HexColor("#1e293b")
-            BLUE  = colors.HexColor("#1976D2")
+            DARK = colors.HexColor("#1e293b")
+            BLUE = colors.HexColor("#1976D2")
             LIGHT = colors.HexColor("#f1f5f9")
-            GRAY  = colors.HexColor("#64748b")
+            GRAY = colors.HexColor("#64748b")
 
             doc = SimpleDocTemplate(
                 filepath, pagesize=landscape(A4),
-                rightMargin=1.5*cm, leftMargin=1.5*cm,
-                topMargin=1.5*cm,   bottomMargin=1.5*cm)
+                rightMargin=1.5 * cm, leftMargin=1.5 * cm,
+                topMargin=1.5 * cm, bottomMargin=1.5 * cm)
 
             story = []
 
             #  En-tête entreprise
             from utils.pdf_generator import get_company_info
-            params         = get_company_info()
+            params = get_company_info()
             nom_entreprise = params.get('nom_entreprise', '')
-            adresse        = params.get('adresse', '')
-            telephone      = params.get('telephone', '')
-            email_ent      = params.get('email', '')
+            adresse = params.get('adresse', '')
+            telephone = params.get('telephone', '')
+            email_ent = params.get('email', '')
 
             # Ligne entreprise
-            story.append(Spacer(1, 0.3*cm))
+            story.append(Spacer(1, 0.3 * cm))
             story.append(Paragraph(
                 nom_entreprise,
                 ParagraphStyle("Ent", fontSize=13, fontName="Helvetica-Bold",
                                textColor=BLUE, spaceAfter=4)))
             if adresse or telephone or email_ent:
-                contact = " | ".join(filter(None, [adresse, telephone, email_ent]))
+                contact = " | ".join(
+                    filter(None, [adresse, telephone, email_ent]))
                 story.append(Paragraph(
                     contact,
                     ParagraphStyle("Contact", fontSize=8, fontName="Helvetica",
                                    textColor=GRAY, spaceAfter=6)))
-            story.append(Spacer(1, 0.4*cm))
+            story.append(Spacer(1, 0.4 * cm))
             story.append(HRFlowable(width="100%", thickness=1.5,
-                                    color=BLUE, spaceAfter=0.5*cm))
+                                    color=BLUE, spaceAfter=0.5 * cm))
 
             #  Titre du document
             story.append(Paragraph(
@@ -313,7 +354,7 @@ class ClientsView(QWidget):
                 f"— {len(clients or [])} client(s)",
                 ParagraphStyle("S", fontSize=8, fontName="Helvetica",
                                textColor=GRAY, spaceAfter=6)))
-            story.append(Spacer(1, 0.6*cm))
+            story.append(Spacer(1, 0.6 * cm))
 
             #  Tableau
             headers = ["Nom", "Prénom", "Téléphone",
@@ -327,7 +368,8 @@ class ClientsView(QWidget):
                         if hasattr(dv, 'strftime'):
                             dv_str = dv.strftime('%d/%m/%Y')
                         else:
-                            dv_str = _dt.strptime(str(dv)[:10], '%Y-%m-%d').strftime('%d/%m/%Y')
+                            dv_str = _dt.strptime(
+                                str(dv)[:10], '%Y-%m-%d').strftime('%d/%m/%Y')
                     except Exception:
                         dv_str = str(dv)[:10]
                 else:
@@ -342,22 +384,29 @@ class ClientsView(QWidget):
                     dv_str,
                 ])
 
-            W = landscape(A4)[0] - 3*cm
-            col_w = [W*0.12, W*0.12, W*0.15, W*0.22, W*0.12, W*0.13, W*0.14]
+            W = landscape(A4)[0] - 3 * cm
+            col_w = [
+                W * 0.12,
+                W * 0.12,
+                W * 0.15,
+                W * 0.22,
+                W * 0.12,
+                W * 0.13,
+                W * 0.14]
             t = Table(data, colWidths=col_w, repeatRows=1)
             t.setStyle(TableStyle([
-                ("BACKGROUND",     (0, 0), (-1, 0),  DARK),
-                ("TEXTCOLOR",      (0, 0), (-1, 0),  colors.white),
-                ("FONTNAME",       (0, 0), (-1, 0),  "Helvetica-Bold"),
-                ("FONTSIZE",       (0, 0), (-1, -1), 8),
-                ("ALIGN",          (0, 0), (-1, -1), "CENTER"),
-                ("VALIGN",         (0, 0), (-1, -1), "MIDDLE"),
-                ("TOPPADDING",     (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING",  (0, 0), (-1, -1), 6),
+                ("BACKGROUND", (0, 0), (-1, 0), DARK),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, LIGHT]),
-                ("GRID",           (0, 0), (-1, -1), 0.3,
-                                   colors.HexColor("#e2e8f0")),
-                ("LINEBELOW",      (0, 0), (-1, 0),  1.5, BLUE),
+                ("GRID", (0, 0), (-1, -1), 0.3,
+                 colors.HexColor("#e2e8f0")),
+                ("LINEBELOW", (0, 0), (-1, 0), 1.5, BLUE),
             ]))
             story.append(t)
             doc.build(story)
@@ -371,41 +420,19 @@ class ClientsView(QWidget):
     def _apply_styles(self):
         self.setStyleSheet("""
             QLabel#lbl_titre {
-                font-size: 20px; font-weight: bold; color: #1e293b;
+                font-size: 18px; font-weight: bold; color: #1e293b;
             }
-            QLabel#lbl_total { font-size: 13px; color: #64748b; }
-            QLabel#status_bar { font-size: 11px; color: #64748b; padding: 4px; }
-            QLineEdit {
-                border: 1px solid #cbd5e1; border-radius: 5px;
-                padding: 5px 10px; font-size: 13px; background: white;
+            QLabel#lbl_total  { font-size: 11px; color: #94a3b8; }
+            QLabel#status_bar { font-size: 11px; color: #94a3b8; padding: 2px 0; }
+            QPushButton#btn_export_excel {
+                background-color: #dcfce7; color: #16a34a;
             }
-            QLineEdit:focus { border-color: #1976D2; }
-            QPushButton {
-                border: none; border-radius: 5px; padding: 5px 10px;
-                font-size: 12px; color: white; background-color: #64748b;
+            QPushButton#btn_export_excel:hover { background-color: #bbf7d0; }
+            QPushButton#btn_export_pdf {
+                background-color: #fee2e2; color: #dc2626;
             }
-            QPushButton:hover { background-color: #475569; }
-            QPushButton#btn_add  { background-color: #1976D2; font-weight: bold; }
-            QPushButton#btn_add:hover  { background-color: #1565C0; }
-            QPushButton#btn_export_excel { background-color: #16a34a; }
-            QPushButton#btn_export_excel:hover { background-color: #15803d; }
-            QPushButton#btn_export_pdf { background-color: #dc2626; }
-            QPushButton#btn_export_pdf:hover { background-color: #b91c1c; }
-            QPushButton:disabled { background-color: #e2e8f0; color: #94a3b8; }
-            QTableWidget {
-                border: 1px solid #e2e8f0; border-radius: 5px;
-                gridline-color: #f1f5f9; font-size: 13px; background: white;
-            }
-            QTableWidget::item:selected {
-                background-color: #dbeafe; color: #1e293b;
-            }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 12px; padding: 8px;
-                border: none; border-bottom: 2px solid #e2e8f0;
-            }
+            QPushButton#btn_export_pdf:hover { background-color: #fecaca; }
         """)
-
 
 
 # Dialogue Formulaire Client
@@ -416,7 +443,8 @@ class ClientFormDialog(QDialog):
     def __init__(self, client_data=None, parent=None):
         super().__init__(parent)
         is_edit = client_data is not None
-        self.setWindowTitle("Modifier le client" if is_edit else "Nouveau client")
+        self.setWindowTitle(
+            "Modifier le client" if is_edit else "Nouveau client")
         self.setMinimumWidth(450)
         self.setModal(True)
         self._build_ui()
@@ -429,30 +457,32 @@ class ClientFormDialog(QDialog):
         layout.setContentsMargins(20, 20, 20, 20)
         form = QFormLayout()
         form.setSpacing(10)
-        self.nom_input       = QLineEdit()
-        self.prenom_input    = QLineEdit()
+        self.nom_input = QLineEdit()
+        self.prenom_input = QLineEdit()
         self.telephone_input = QLineEdit()
-        self.email_input     = QLineEdit()
-        self.adresse_input   = QLineEdit()
-        self.ville_input     = QLineEdit()
-        self.postal_input    = QLineEdit()
+        self.email_input = QLineEdit()
+        self.adresse_input = QLineEdit()
+        self.ville_input = QLineEdit()
+        self.postal_input = QLineEdit()
         for w in [self.nom_input, self.prenom_input, self.telephone_input,
                   self.email_input, self.adresse_input,
                   self.ville_input, self.postal_input]:
             w.setMinimumHeight(34)
-        form.addRow("Nom *",       self.nom_input)
-        form.addRow("Prenom *",    self.prenom_input)
-        form.addRow("Telephone",   self.telephone_input)
-        form.addRow("Email",       self.email_input)
-        form.addRow("Adresse",     self.adresse_input)
-        form.addRow("Ville",       self.ville_input)
+        form.addRow("Nom *", self.nom_input)
+        form.addRow("Prenom *", self.prenom_input)
+        form.addRow("Telephone", self.telephone_input)
+        form.addRow("Email", self.email_input)
+        form.addRow("Adresse", self.adresse_input)
+        form.addRow("Ville", self.ville_input)
         form.addRow("Code postal", self.postal_input)
         layout.addLayout(form)
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save |
             QDialogButtonBox.StandardButton.Cancel)
-        buttons.button(QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         buttons.accepted.connect(self._validate)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -468,26 +498,29 @@ class ClientFormDialog(QDialog):
 
     def _validate(self):
         if not self.nom_input.text().strip():
-            QMessageBox.warning(self, "Champ requis", "Le nom est obligatoire.")
+            QMessageBox.warning(
+                self, "Champ requis", "Le nom est obligatoire.")
             self.nom_input.setFocus()
             return
         if not self.prenom_input.text().strip():
-            QMessageBox.warning(self, "Champ requis", "Le prenom est obligatoire.")
+            QMessageBox.warning(
+                self,
+                "Champ requis",
+                "Le prenom est obligatoire.")
             self.prenom_input.setFocus()
             return
         self.accept()
 
     def get_data(self):
         return {
-            'nom':         self.nom_input.text().strip(),
-            'prenom':      self.prenom_input.text().strip(),
-            'telephone':   self.telephone_input.text().strip(),
-            'email':       self.email_input.text().strip(),
-            'adresse':     self.adresse_input.text().strip(),
-            'ville':       self.ville_input.text().strip(),
+            'nom': self.nom_input.text().strip(),
+            'prenom': self.prenom_input.text().strip(),
+            'telephone': self.telephone_input.text().strip(),
+            'email': self.email_input.text().strip(),
+            'adresse': self.adresse_input.text().strip(),
+            'ville': self.ville_input.text().strip(),
             'code_postal': self.postal_input.text().strip(),
         }
-
 
 
 # Dialogue Historique des achats
@@ -519,9 +552,9 @@ class PurchaseHistoryDialog(QDialog):
             sf.setContentsMargins(20, 10, 20, 10)
             sf.setSpacing(30)
             for i, (label, val) in enumerate([
-                ("Nb achats",        str(stats.get("nb_achats", 0))),
-                ("CA total",         f"{float(stats.get('ca_total', 0)):.2f}"),
-                ("Dernière visite",  stats.get("derniere_visite") or "N/A"),
+                ("Nb achats", str(stats.get("nb_achats", 0))),
+                ("CA total", f"{float(stats.get('ca_total', 0)):.2f}"),
+                ("Dernière visite", stats.get("derniere_visite") or "N/A"),
             ]):
                 block = QVBoxLayout()
                 lbl_l = QLabel(label)
@@ -550,10 +583,10 @@ class PurchaseHistoryDialog(QDialog):
         table.horizontalHeader().setStretchLastSection(True)
 
         statut_colors = {
-            'payee':     '#16a34a',
-            'en_cours':  '#1976D2',
+            'payee': '#16a34a',
+            'en_cours': '#1976D2',
             'partielle': '#d97706',
-            'annulee':   '#dc2626',
+            'annulee': '#dc2626',
         }
         for row_idx, v in enumerate(history):
             table.insertRow(row_idx)
@@ -572,7 +605,9 @@ class PurchaseHistoryDialog(QDialog):
                 if col_idx == 5:
                     item.setForeground(
                         QColor(statut_colors.get(statut, '#64748b')))
-                    f = item.font(); f.setBold(True); item.setFont(f)
+                    f = item.font()
+                    f.setBold(True)
+                    item.setFont(f)
                 table.setItem(row_idx, col_idx, item)
 
         if not history:

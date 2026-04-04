@@ -4,6 +4,8 @@
 from database.connection import db
 
 
+
+
 class ClientModel:
     """Modele d'acces aux donnees pour les clients."""
 

@@ -1,21 +1,35 @@
 # views/sales_view.py
 import os
-from PyQt6 import uic
-from PyQt6.QtWidgets import (
-    QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QPushButton, QMessageBox, QComboBox,
-    QTableWidget, QTableWidgetItem, QHeaderView, QDialogButtonBox,
-    QSpinBox, QDoubleSpinBox, QTextEdit, QFrame, QAbstractItemView,
-    QFileDialog, QDateEdit
-)
-from PyQt6.QtCore import Qt, QDate
-from PyQt6.QtGui import QFont, QColor
-from controllers.sale_controller import SaleController
+
+from controllers.auth_controller import SessionManager
 from controllers.client_controller import ClientController
 from controllers.product_controller import ProductController
-from controllers.auth_controller import SessionManager
-
+from controllers.sale_controller import SaleController
+from PyQt6 import uic
+from PyQt6.QtCore import QDate, Qt, QTimer
+from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDateEdit,
+    QDialog,
+    QDialogButtonBox,
+    QDoubleSpinBox,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.pagination_widget import PaginationWidget
+
 
 def _confirm(parent, title, message):
     box = QMessageBox(parent)
@@ -58,7 +72,15 @@ class SalesView(QWidget):
         self.btn_reset.clicked.connect(self._reset)
         self.search_input.returnPressed.connect(self._search)
         self.filter_statut.currentIndexChanged.connect(self._search)
-        self.sales_table.itemSelectionChanged.connect(self._on_selection_changed)
+        # Debounce : attend 300ms apres la derniere frappe avant de chercher
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(300)
+        self._search_timer.timeout.connect(self._search)
+        self.search_input.textChanged.connect(
+            lambda: self._search_timer.start())
+        self.sales_table.itemSelectionChanged.connect(
+            self._on_selection_changed)
         self.sales_table.doubleClicked.connect(self._view_sale)
         # Pagination
         self._all_sales = []
@@ -79,7 +101,7 @@ class SalesView(QWidget):
         self.status_bar.setText(f"{count} vente(s) affichée(s)")
         self.pagination.reset(count)
         offset = self.pagination.current_offset()
-        limit  = self.pagination.current_limit()
+        limit = self.pagination.current_limit()
         self._populate_table(self._all_sales[offset:offset + limit])
 
     def _on_page_changed(self, page, offset, limit):
@@ -92,13 +114,16 @@ class SalesView(QWidget):
         s = str(date_val)
         try:
             from datetime import datetime
-            # Formats possibles : datetime object, 'YYYY-MM-DD HH:MM:SS', 'YYYY-MM-DD HH:MM'
+
+            # Formats possibles : datetime object, 'YYYY-MM-DD HH:MM:SS',
+            # 'YYYY-MM-DD HH:MM'
             if hasattr(date_val, 'strftime'):
                 return date_val.strftime('%d-%m-%Y %H:%M:%S')
             s = s.strip()
             for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'):
                 try:
-                    return datetime.strptime(s[:19], fmt).strftime('%d-%m-%Y %H:%M:%S')
+                    return datetime.strptime(
+                        s[:19], fmt).strftime('%d-%m-%Y %H:%M:%S')
                 except ValueError:
                     continue
         except Exception:
@@ -108,10 +133,10 @@ class SalesView(QWidget):
     def _populate_table(self, sales):
         self.sales_table.setRowCount(0)
         statut_colors = {
-            'payee':    '#16a34a',
-            'partielle':'#d97706',
+            'payee': '#16a34a',
+            'partielle': '#d97706',
             'en_cours': '#1976D2',
-            'annulee':  '#dc2626',
+            'annulee': '#dc2626',
         }
         for row_idx, s in enumerate(sales):
             self.sales_table.insertRow(row_idx)
@@ -193,9 +218,13 @@ class SalesView(QWidget):
         vente = SaleController.get_by_id(sale_id)
         if not vente:
             return
-        if not _confirm(self, "Confirmer la validation",
-                        f"Valider la vente {vente.get('numero_facture', '')} ?\n\n"
-                        "Cette action marquera la vente comme PAYEE."):
+        if not _confirm(
+            self,
+            "Confirmer la validation",
+            f"Valider la vente {
+                vente.get(
+                    'numero_facture',
+                '')} ?\n\n" "Cette action marquera la vente comme PAYEE."):
             return
         success, message = SaleController.validate(sale_id)
         if success:
@@ -209,10 +238,10 @@ class SalesView(QWidget):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             data = dialog.get_data()
             success, result = SaleController.create(
-                client_id    = data['client_id'],
-                panier       = data['panier'],
-                montant_paye = data['montant_paye'],
-                notes        = data['notes'],
+                client_id=data['client_id'],
+                panier=data['panier'],
+                montant_paye=data['montant_paye'],
+                notes=data['notes'],
             )
             if success:
                 self.load_sales()
@@ -229,9 +258,9 @@ class SalesView(QWidget):
         sale_id = self._get_selected_id()
         if not sale_id:
             return
-        vente   = SaleController.get_by_id(sale_id)
+        vente = SaleController.get_by_id(sale_id)
         details = SaleController.get_details(sale_id)
-        dialog  = SaleDetailDialog(vente, details, parent=self)
+        dialog = SaleDetailDialog(vente, details, parent=self)
         dialog.exec()
         self.load_sales()
 
@@ -239,7 +268,7 @@ class SalesView(QWidget):
         sale_id = self._get_selected_id()
         if not sale_id:
             return
-        vente   = SaleController.get_by_id(sale_id)
+        vente = SaleController.get_by_id(sale_id)
         details = SaleController.get_details(sale_id)
         try:
             from utils.pdf_generator import generate_invoice_pdf
@@ -254,10 +283,12 @@ class SalesView(QWidget):
         sale_id = self._get_selected_id()
         if not sale_id:
             return
-        row    = self.sales_table.currentRow()
+        row = self.sales_table.currentRow()
         numero = self.sales_table.item(row, 1).text()
-        if _confirm(self, "Confirmation",
-                    f"Annuler la vente {numero} ?\nLe stock sera remis a jour."):
+        if _confirm(
+            self,
+            "Confirmation",
+                f"Annuler la vente {numero} ?\nLe stock sera remis a jour."):
             success, message = SaleController.cancel(sale_id)
             if success:
                 self.load_sales()
@@ -283,26 +314,27 @@ class SalesView(QWidget):
             return
         try:
             import openpyxl
-            from openpyxl.styles import Font, PatternFill, Alignment
+            from openpyxl.styles import Alignment, Font, PatternFill
 
             sales = SaleController.get_all()
             # Filtrer par date
-            sales = [s for s in sales
-                     if date_debut <= str(s.get('date_vente', ''))[:10] <= date_fin]
+            sales = [s for s in sales if date_debut <= str(
+                s.get('date_vente', ''))[:10] <= date_fin]
 
             wb = openpyxl.Workbook()
             ws = wb.active
             ws.title = "Ventes"
             headers = ["N Facture", "Client", "Vendeur", "Date",
                        "Total", "Paye", "Reste", "Statut"]
-            dark  = PatternFill("solid", fgColor="1e293b")
+            dark = PatternFill("solid", fgColor="1e293b")
             light = PatternFill("solid", fgColor="f1f5f9")
 
             for ci, h in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=ci, value=h)
                 cell.fill = dark
                 cell.font = Font(color="FFFFFF", bold=True, size=10)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.alignment = Alignment(
+                    horizontal="center", vertical="center")
             ws.row_dimensions[1].height = 22
 
             for ri, s in enumerate(sales, 2):
@@ -337,39 +369,15 @@ class SalesView(QWidget):
 
     def _apply_styles(self):
         self.setStyleSheet("""
-            QLabel#lbl_titre { font-size: 20px; font-weight: bold; color: #1e293b; }
-            QLabel#lbl_total { font-size: 13px; color: #64748b; }
-            QLabel#status_bar { font-size: 11px; color: #64748b; padding: 4px; }
-            QLineEdit, QComboBox {
-                border: 1px solid #cbd5e1; border-radius: 5px;
-                padding: 5px 10px; font-size: 13px; background: white;
+            QLabel#lbl_titre {
+                font-size: 18px; font-weight: bold; color: #1e293b;
             }
-            QLineEdit:focus { border-color: #1976D2; }
-            QPushButton {
-                border: none; border-radius: 5px; padding: 5px 10px;
-                font-size: 12px; color: white; background-color: #64748b;
+            QLabel#lbl_total  { font-size: 11px; color: #94a3b8; }
+            QLabel#status_bar { font-size: 11px; color: #94a3b8; padding: 2px 0; }
+            QPushButton#btn_export_excel {
+                background-color: #dcfce7; color: #16a34a;
             }
-            QPushButton:hover { background-color: #475569; }
-            QPushButton#btn_add { background-color: #1976D2; font-weight: bold; }
-            QPushButton#btn_add:hover { background-color: #1565C0; }
-            QPushButton#btn_validate {
-                background-color: #16a34a; color: white; font-weight: bold;
-            }
-            QPushButton#btn_validate:hover { background-color: #15803d; }
-            QPushButton#btn_validate:disabled { background-color: #bbf7d0; color: #64748b; }
-            QPushButton#btn_export_excel { background-color: #16a34a; }
-            QPushButton#btn_export_excel:hover { background-color: #15803d; }
-            QPushButton:disabled { background-color: #e2e8f0; color: #94a3b8; }
-            QTableWidget {
-                border: 1px solid #e2e8f0; border-radius: 5px;
-                gridline-color: #f1f5f9; font-size: 13px; background: white;
-            }
-            QTableWidget::item:selected { background-color: #dbeafe; color: #1e293b; }
-            QHeaderView::section {
-                background-color: #f8fafc; color: #475569;
-                font-weight: bold; font-size: 12px; padding: 8px;
-                border: none; border-bottom: 2px solid #e2e8f0;
-            }
+            QPushButton#btn_export_excel:hover { background-color: #bbf7d0; }
         """)
 
 
@@ -402,14 +410,15 @@ class ExportExcelDialog(QDialog):
         self.date_fin.setDisplayFormat("dd/MM/yyyy")
 
         form.addRow("Date début :", self.date_debut)
-        form.addRow("Date fin :",   self.date_fin)
+        form.addRow("Date fin :", self.date_fin)
         layout.addLayout(form)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok |
             QDialogButtonBox.StandardButton.Cancel)
         buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Exporter")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -488,7 +497,8 @@ class SaleFormDialog(QDialog):
 
         # Ajout produit
         sep1 = QLabel("Ajouter un produit au panier")
-        sep1.setStyleSheet("font-weight: bold; color: #475569; margin-top: 5px;")
+        sep1.setStyleSheet(
+            "font-weight: bold; color: #475569; margin-top: 5px;")
         layout.addWidget(sep1)
 
         product_bar = QHBoxLayout()
@@ -523,8 +533,10 @@ class SaleFormDialog(QDialog):
         self.cart_table.setColumnCount(5)
         self.cart_table.setHorizontalHeaderLabels(
             ["Produit", "Prix unitaire", "Quantite", "Sous-total", ""])
-        self.cart_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.cart_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.cart_table.setEditTriggers(
+            QTableWidget.EditTrigger.NoEditTriggers)
+        self.cart_table.setSelectionBehavior(
+            QTableWidget.SelectionBehavior.SelectRows)
         self.cart_table.verticalHeader().setVisible(False)
         self.cart_table.horizontalHeader().setStretchLastSection(True)
         self.cart_table.setMaximumHeight(180)
@@ -553,16 +565,16 @@ class SaleFormDialog(QDialog):
         # TVA
         self.tva_combo = QComboBox()
         self.tva_combo.setMinimumHeight(32)
-        self.tva_combo.addItem("Sans TVA (0%)",  0.0)
-        self.tva_combo.addItem("TVA 9%",         0.09)
-        self.tva_combo.addItem("TVA 18%",        0.18)
-        self.tva_combo.addItem("TVA 20%",        0.20)
+        self.tva_combo.addItem("Sans TVA (0%)", 0.0)
+        self.tva_combo.addItem("TVA 9%", 0.09)
+        self.tva_combo.addItem("TVA 18%", 0.18)
+        self.tva_combo.addItem("TVA 20%", 0.20)
         self.tva_combo.setCurrentIndex(2)  # TVA 18% par defaut (Cote d'Ivoire)
 
-        self.lbl_sous_total   = QLabel("0.00")
-        self.lbl_remise_val   = QLabel("0.00")
-        self.lbl_tva_val      = QLabel("0.00")
-        self.lbl_total        = QLabel("0.00")
+        self.lbl_sous_total = QLabel("0.00")
+        self.lbl_remise_val = QLabel("0.00")
+        self.lbl_tva_val = QLabel("0.00")
+        self.lbl_total = QLabel("0.00")
         self.lbl_total.setStyleSheet(
             "font-size:16px;font-weight:bold;color:#1976D2;")
 
@@ -575,14 +587,14 @@ class SaleFormDialog(QDialog):
         self.lbl_reste.setStyleSheet(
             "font-size:13px;color:#dc2626;font-weight:bold;")
 
-        form3.addRow("Sous-total HT :",  self.lbl_sous_total)
-        form3.addRow("Remise :",         remise_layout)
+        form3.addRow("Sous-total HT :", self.lbl_sous_total)
+        form3.addRow("Remise :", remise_layout)
         form3.addRow("Remise (valeur) :", self.lbl_remise_val)
-        form3.addRow("TVA :",            self.tva_combo)
-        form3.addRow("TVA (valeur) :",   self.lbl_tva_val)
-        form3.addRow("Total TTC :",      self.lbl_total)
-        form3.addRow("Montant payé :",   self.montant_paye_input)
-        form3.addRow("Reste a payer :",  self.lbl_reste)
+        form3.addRow("TVA :", self.tva_combo)
+        form3.addRow("TVA (valeur) :", self.lbl_tva_val)
+        form3.addRow("Total TTC :", self.lbl_total)
+        form3.addRow("Montant payé :", self.montant_paye_input)
+        form3.addRow("Reste a payer :", self.lbl_reste)
         bottom.addLayout(form3)
         layout.addLayout(bottom)
 
@@ -590,15 +602,18 @@ class SaleFormDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save |
             QDialogButtonBox.StandardButton.Cancel)
-        buttons.button(QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Save).setText("Enregistrer")
+        buttons.button(
+            QDialogButtonBox.StandardButton.Cancel).setText("Annuler")
         buttons.accepted.connect(self._validate)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
         # Connexions
         self.btn_add_line.clicked.connect(self._add_to_cart)
-        self.product_combo.currentIndexChanged.connect(self._on_product_selected)
+        self.product_combo.currentIndexChanged.connect(
+            self._on_product_selected)
         self.montant_paye_input.valueChanged.connect(self._update_reste)
         self.remise_input.valueChanged.connect(self._update_total)
         self.remise_type.currentIndexChanged.connect(self._update_total)
@@ -625,8 +640,11 @@ class SaleFormDialog(QDialog):
                     if self.client_combo.itemData(i) == result:
                         self.client_combo.setCurrentIndex(i)
                         break
-                QMessageBox.information(self, "Succès",
-                    f"Client {data['nom']} {data.get('prenom','')} créé et sélectionné.")
+                QMessageBox.information(
+                    self, "Succès", f"Client {
+                        data['nom']} {
+                        data.get(
+                            'prenom', '')} créé et sélectionné.")
             else:
                 QMessageBox.warning(self, "Erreur", result)
 
@@ -646,7 +664,7 @@ class SaleFormDialog(QDialog):
         if not product_data:
             QMessageBox.warning(self, "Attention", "Selectionnez un produit.")
             return
-        qty   = self.qty_input.value()
+        qty = self.qty_input.value()
         price = self.price_input.value()
         if price <= 0:
             QMessageBox.warning(self, "Attention",
@@ -664,9 +682,9 @@ class SaleFormDialog(QDialog):
                 self._update_total()
                 return
         self.panier.append({
-            'produit_id':    product_data['id'],
-            'nom':           product_data['nom'],
-            'quantite':      qty,
+            'produit_id': product_data['id'],
+            'nom': product_data['nom'],
+            'quantite': qty,
             'prix_unitaire': price,
         })
         self._refresh_cart()
@@ -703,7 +721,7 @@ class SaleFormDialog(QDialog):
     def _update_total(self):
         """Calcule sous-total HT, remise, TVA et total TTC."""
         sous_total = sum(
-            l['quantite'] * l['prix_unitaire'] for l in self.panier)
+            item_p['quantite'] * item_p['prix_unitaire'] for item_p in self.panier)
         self.lbl_sous_total.setText(f"{sous_total:.2f}")
 
         # Remise
@@ -718,7 +736,7 @@ class SaleFormDialog(QDialog):
 
         # TVA
         tva_rate = self.tva_combo.currentData() or 0.0
-        tva_val  = apres_remise * tva_rate
+        tva_val = apres_remise * tva_rate
         self.lbl_tva_val.setText(f"{tva_val:.2f}")
 
         total = apres_remise + tva_val
@@ -751,10 +769,10 @@ class SaleFormDialog(QDialog):
         except ValueError:
             total = 0
         return {
-            'client_id':    self.client_combo.currentData(),
-            'panier':       self.panier,
+            'client_id': self.client_combo.currentData(),
+            'panier': self.panier,
             'montant_paye': self.montant_paye_input.value(),
-            'notes':        self.notes_input.text().strip(),
+            'notes': self.notes_input.text().strip(),
             'montant_total': total,
         }
 
@@ -779,27 +797,33 @@ class QuickClientDialog(QDialog):
         layout.setContentsMargins(20, 20, 20, 20)
 
         title = QLabel("Créer un nouveau client")
-        title.setStyleSheet("font-size: 15px; font-weight: bold; color: #1e293b;")
+        title.setStyleSheet(
+            "font-size: 15px; font-weight: bold; color: #1e293b;")
         layout.addWidget(title)
 
         form = QFormLayout()
         form.setSpacing(10)
 
-        self.nom_input      = QLineEdit(); self.nom_input.setPlaceholderText("Obligatoire")
-        self.prenom_input   = QLineEdit(); self.prenom_input.setPlaceholderText("Optionnel")
-        self.tel_input      = QLineEdit(); self.tel_input.setPlaceholderText("Ex: +225 07 00 00 00")
-        self.email_input    = QLineEdit(); self.email_input.setPlaceholderText("Optionnel")
-        self.ville_input    = QLineEdit(); self.ville_input.setPlaceholderText("Optionnel")
+        self.nom_input = QLineEdit()
+        self.nom_input.setPlaceholderText("Obligatoire")
+        self.prenom_input = QLineEdit()
+        self.prenom_input.setPlaceholderText("Optionnel")
+        self.tel_input = QLineEdit()
+        self.tel_input.setPlaceholderText("Ex: +225 07 00 00 00")
+        self.email_input = QLineEdit()
+        self.email_input.setPlaceholderText("Optionnel")
+        self.ville_input = QLineEdit()
+        self.ville_input.setPlaceholderText("Optionnel")
 
         for w in [self.nom_input, self.prenom_input, self.tel_input,
                   self.email_input, self.ville_input]:
             w.setMinimumHeight(32)
 
-        form.addRow("Nom *",       self.nom_input)
-        form.addRow("Prénom",      self.prenom_input)
-        form.addRow("Téléphone",   self.tel_input)
-        form.addRow("Email",       self.email_input)
-        form.addRow("Ville",       self.ville_input)
+        form.addRow("Nom *", self.nom_input)
+        form.addRow("Prénom", self.prenom_input)
+        form.addRow("Téléphone", self.tel_input)
+        form.addRow("Email", self.email_input)
+        form.addRow("Ville", self.ville_input)
         layout.addLayout(form)
 
         # Boutons
@@ -807,12 +831,14 @@ class QuickClientDialog(QDialog):
         btn_layout.addStretch()
         btn_cancel = QPushButton("Annuler")
         btn_cancel.setFixedHeight(34)
-        btn_cancel.setStyleSheet("background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; border-radius:5px; padding:0 16px;")
+        btn_cancel.setStyleSheet(
+            "background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; border-radius:5px; padding:0 16px;")
         btn_cancel.clicked.connect(self.reject)
 
         btn_save = QPushButton("Créer le client")
         btn_save.setFixedHeight(34)
-        btn_save.setStyleSheet("background:#1976D2; color:white; border:none; border-radius:5px; padding:0 16px; font-weight:bold;")
+        btn_save.setStyleSheet(
+            "background:#1976D2; color:white; border:none; border-radius:5px; padding:0 16px; font-weight:bold;")
         btn_save.clicked.connect(self._validate)
 
         btn_layout.addWidget(btn_cancel)
@@ -821,21 +847,24 @@ class QuickClientDialog(QDialog):
 
     def _validate(self):
         if not self.nom_input.text().strip():
-            QMessageBox.warning(self, "Champ manquant", "Le nom du client est obligatoire.")
+            QMessageBox.warning(
+                self,
+                "Champ manquant",
+                "Le nom du client est obligatoire.")
             self.nom_input.setFocus()
             return
         self.accept()
 
     def get_data(self) -> dict:
         return {
-            'nom':      self.nom_input.text().strip(),
-            'prenom':   self.prenom_input.text().strip(),
-            'telephone':self.tel_input.text().strip() or None,
-            'email':    self.email_input.text().strip() or None,
-            'ville':    self.ville_input.text().strip() or None,
-            'adresse':  None,
+            'nom': self.nom_input.text().strip(),
+            'prenom': self.prenom_input.text().strip(),
+            'telephone': self.tel_input.text().strip() or None,
+            'email': self.email_input.text().strip() or None,
+            'ville': self.ville_input.text().strip() or None,
+            'adresse': None,
             'code_postal': None,
-            'notes':    None,
+            'notes': None,
         }
 
 
@@ -848,7 +877,8 @@ class SaleDetailDialog(QDialog):
     def __init__(self, vente, details, parent=None):
         super().__init__(parent)
         self.vente = vente
-        self.setWindowTitle(f"Détail vente - {vente.get('numero_facture', '')}")
+        self.setWindowTitle(
+            f"Détail vente - {vente.get('numero_facture', '')}")
         self.setMinimumSize(650, 500)
         self._build_ui(vente, details)
 
@@ -859,10 +889,21 @@ class SaleDetailDialog(QDialog):
 
         info_layout = QHBoxLayout()
         left = QVBoxLayout()
-        left.addWidget(QLabel(f"N Facture : {vente.get('numero_facture', '')}"))
+        left.addWidget(
+            QLabel(
+                f"N Facture : {
+                    vente.get(
+                        'numero_facture',
+                        '')}"))
         left.addWidget(QLabel(f"Client    : {vente.get('client_nom', '')}"))
         left.addWidget(QLabel(f"Vendeur   : {vente.get('vendeur', '')}"))
-        left.addWidget(QLabel(f"Date      : {SalesView._format_date(vente.get('date_vente', ''))}"))
+        left.addWidget(
+            QLabel(
+                f"Date      : {
+                    SalesView._format_date(
+                        vente.get(
+                            'date_vente',
+                            ''))}"))
 
         right = QVBoxLayout()
         right.addWidget(QLabel(
