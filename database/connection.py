@@ -119,6 +119,7 @@ class Database:
         Utilise le pool de connexions si la connexion principale est indisponible.
         """
         conn = None
+        use_pool = False
         try:
             # Preference : connexion principale (compatibilite)
             if self._connection:

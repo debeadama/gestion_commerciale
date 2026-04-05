@@ -18,7 +18,7 @@ class CategoryModel:
         return db.execute_query("""
             SELECT c.id, c.nom, c.description,
                    (SELECT COUNT(*) FROM produits p
-                    WHERE p.category_id = c.id) AS nb_produits
+                    WHERE p.categorie_id = c.id) AS nb_produits
             FROM categories c
             ORDER BY c.nom
         """)
@@ -95,7 +95,7 @@ class CategoryModel:
             ValueError: Si des produits utilisent encore cette categorie.
         """
         result = db.execute_query(
-            "SELECT COUNT(*) AS nb FROM produits WHERE category_id=%s",
+            "SELECT COUNT(*) AS nb FROM produits WHERE categorie_id=%s",
             (category_id,),
             fetch_one=True,
         )

@@ -27,7 +27,7 @@ class ProductModel:
             )
             params += [pattern, pattern]
         if category_id:
-            conditions.append("p.category_id=%s")
+            conditions.append("p.categorie_id=%s")
             params.append(category_id)
         where = (
             "WHERE " + " AND ".join(conditions) if conditions else ""
@@ -37,9 +37,9 @@ class ProductModel:
             SELECT p.id, p.nom, p.description,
                    p.prix_achat, p.prix_vente,
                    p.stock_actuel, p.stock_min,
-                   c.nom AS categorie, p.category_id
+                   c.nom AS categorie, p.categorie_id AS category_id
             FROM produits p
-            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN categories c ON p.categorie_id = c.id
             {where}
             ORDER BY p.nom
             """,
@@ -61,7 +61,7 @@ class ProductModel:
             """
             SELECT p.*, c.nom AS categorie_nom
             FROM produits p
-            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN categories c ON p.categorie_id = c.id
             WHERE p.id=%s
             """,
             (product_id,),
@@ -93,7 +93,7 @@ class ProductModel:
             SELECT p.id, p.nom, p.stock_actuel, p.stock_min,
                    c.nom AS categorie
             FROM produits p
-            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN categories c ON p.categorie_id = c.id
             WHERE p.stock_actuel <= p.stock_min
               AND p.stock_min IS NOT NULL
               AND p.stock_min > 0
@@ -212,7 +212,7 @@ class ProductModel:
             ValueError: Si des produits utilisent encore cette categorie.
         """
         count = db.execute_query(
-            "SELECT COUNT(*) AS nb FROM produits WHERE category_id=%s",
+            "SELECT COUNT(*) AS nb FROM produits WHERE categorie_id=%s",
             (category_id,),
             fetch_one=True,
         )
@@ -242,7 +242,7 @@ class ProductModel:
             """
             INSERT INTO produits
                 (nom, description, prix_achat, prix_vente,
-                 stock_actuel, stock_min, category_id)
+                 stock_actuel, stock_min, categorie_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
             (
@@ -272,7 +272,7 @@ class ProductModel:
             """
             UPDATE produits
             SET nom=%s, description=%s, prix_achat=%s,
-                prix_vente=%s, stock_min=%s, category_id=%s
+                prix_vente=%s, stock_min=%s, categorie_id=%s
             WHERE id=%s
             """,
             (
