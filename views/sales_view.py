@@ -436,7 +436,7 @@ class ExportExcelDialog(QDialog):
 
 class SaleFormDialog(QDialog):
 
-    TVA_RATE = 0.18  # 18% — modifiable selon le pays
+    TVA_RATE = 0.18  # 18% - modifiable selon le pays
 
     def __init__(self, parent=None):
         super().__init__(parent)

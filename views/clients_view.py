@@ -77,7 +77,7 @@ class ClientsView(QWidget):
             self.btn_export_excel.clicked.connect(self._export_excel)
         if hasattr(self, 'btn_export_pdf'):
             self.btn_export_pdf.clicked.connect(self._export_pdf)
-        # Pagination — inserer sous le tableau
+        # Pagination - inserer sous le tableau
         self._all_clients = []
         self.pagination = PaginationWidget(page_size=50, parent=self)
         self.pagination.page_changed.connect(self._on_page_changed)
@@ -351,7 +351,7 @@ class ClientsView(QWidget):
                                textColor=DARK, spaceAfter=8)))
             story.append(Paragraph(
                 f"Exportée le {dt.now().strftime('%d/%m/%Y à %H:%M')} "
-                f"— {len(clients or [])} client(s)",
+                f"- {len(clients or [])} client(s)",
                 ParagraphStyle("S", fontSize=8, fontName="Helvetica",
                                textColor=GRAY, spaceAfter=6)))
             story.append(Spacer(1, 0.6 * cm))

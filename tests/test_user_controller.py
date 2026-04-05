@@ -10,7 +10,7 @@ Méthodes testées :
   - change_password() : password trop court, succès, exception
   - delete()          : suppression de son propre compte, succès, exception
 
-Architecture : méthodes @staticmethod — UserModel et bcrypt sont
+Architecture : méthodes @staticmethod - UserModel et bcrypt sont
 mockés avec @patch.
 
 Pour exécuter :
@@ -259,7 +259,7 @@ class TestUserControllerDelete(unittest.TestCase):
     def test_suppression_propre_compte_retourne_erreur(self):
         """
         TC-UD-01 : delete() avec user_id == current_user_id doit
-        retourner (False, message) — un admin ne peut pas se supprimer.
+        retourner (False, message) - un admin ne peut pas se supprimer.
         """
         ok, msg = UserController.delete(user_id=1, current_user_id=1)
 

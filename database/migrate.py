@@ -116,7 +116,7 @@ def run_migrations(db=None) -> int:
             raise
 
     if count == 0:
-        logger.info("Base de donnees a jour — aucune migration a appliquer.")
+        logger.info("Base de donnees a jour - aucune migration a appliquer.")
     else:
         logger.info(f"{count} migration(s) appliquee(s).")
 

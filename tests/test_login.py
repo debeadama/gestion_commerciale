@@ -5,7 +5,7 @@ Tests unitaires de la fonction SessionManager.login()
 
 Architecture réelle : SessionManager est une classe entièrement statique.
 login() appelle UserModel.get_by_username() et UserModel.verify_password()
-directement — on les mocke avec @patch pour ne pas toucher la base.
+directement - on les mocke avec @patch pour ne pas toucher la base.
 
 Pour exécuter :
     python tests/test_login.py

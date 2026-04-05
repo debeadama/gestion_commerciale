@@ -14,7 +14,7 @@ Méthodes testées :
   - update_stock()         : appel avec bon stock et bon ID
   - count()                : retourne entier ou 0
 
-Architecture : méthodes @staticmethod — db est mocké avec @patch.
+Architecture : méthodes @staticmethod - db est mocké avec @patch.
 
 Pour exécuter :
     python tests/test_model_product.py

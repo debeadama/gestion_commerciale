@@ -1,5 +1,5 @@
 # test_permissions.py
-# Tests unitaires pour SessionManager — gestion des sessions et permissions
+# Tests unitaires pour SessionManager - gestion des sessions et permissions
 # Lancer avec : python -m pytest test_permissions.py -v
 
 import pytest
@@ -102,7 +102,7 @@ class TestLogout:
 
 
 #
-# 3. Permissions — vendeur
+# 3. Permissions - vendeur
 #
 
 class TestVendeur:
@@ -125,7 +125,7 @@ class TestVendeur:
 
 
 #
-# 4. Permissions — manager
+# 4. Permissions - manager
 #
 
 class TestManager:
@@ -147,7 +147,7 @@ class TestManager:
 
 
 #
-# 5. Permissions — admin
+# 5. Permissions - admin
 #
 
 class TestAdmin:

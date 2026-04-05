@@ -15,7 +15,7 @@ Méthodes testées :
   - delete()            : retourne True, bon ID transmis
   - get_stats()         : retourne dict, {} si None
 
-Architecture : méthodes @staticmethod — db est mocké avec @patch.
+Architecture : méthodes @staticmethod - db est mocké avec @patch.
 verify_password() utilise bcrypt réel (pas de mock nécessaire).
 
 Pour exécuter :
@@ -164,7 +164,7 @@ class TestUserModelGetByUsername(unittest.TestCase):
 
 class TestUserModelVerifyPassword(unittest.TestCase):
     """
-    verify_password() utilise bcrypt réel — pas de mock.
+    verify_password() utilise bcrypt réel - pas de mock.
     On génère un vrai hash pour tester.
     """
 

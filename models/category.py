@@ -1,5 +1,5 @@
 # models/category.py
-"""Modele Categorie — gestion des categories de produits."""
+"""Modele Categorie - gestion des categories de produits."""
 
 from database.connection import db
 

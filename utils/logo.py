@@ -1,7 +1,7 @@
 # utils/logo.py
 """
 Generateur de logo SGC en pur QPainter.
-Retourne un QPixmap rectangulaire pret a l'emploi — aucun fichier image necessaire.
+Retourne un QPixmap rectangulaire pret a l'emploi - aucun fichier image necessaire.
 
 Design : fond bleu nuit degrade, barres de croissance, courbe de tendance,
          texte "SGC" blanc a droite, sous-titre blanc casse.
@@ -106,7 +106,7 @@ def make_logo(size: int = 72) -> QPixmap:
     p.setPen(pen_sep)
     p.drawLine(QPointF(w * 0.54, h * 0.12), QPointF(w * 0.54, h * 0.88))
 
-    # ── 4. Texte "SGC" — blanc pur, grand ───────────────────────
+    # ── 4. Texte "SGC" - blanc pur, grand ───────────────────────
     text_left = w * 0.57
     text_w    = w - text_left - w * 0.02   # ~41% de w
 
@@ -119,7 +119,7 @@ def make_logo(size: int = 72) -> QPixmap:
     sgc_rect = QRectF(text_left, h * 0.04, text_w, h * 0.54)
     p.drawText(sgc_rect, Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, "SGC")
 
-    # ── 5. Sous-texte — blanc casse lisible ──────────────────────
+    # ── 5. Sous-texte - blanc casse lisible ──────────────────────
     font_sub = QFont("Segoe UI", max(5, int(h * 0.125)))
     font_sub.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 0)
     p.setFont(font_sub)

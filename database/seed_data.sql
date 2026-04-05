@@ -34,7 +34,7 @@ INSERT INTO categories (nom, description) VALUES
 ('Consommables',    'Encres, papier, batteries et consommables');
 
 -- ── Produits ──────────────────────────────────────────────────
-INSERT INTO produits (nom, reference, category_id, description, prix_achat, prix_vente, stock_actuel, stock_min, unite) VALUES
+INSERT INTO produits (nom, reference, categorie_id, description, prix_achat, prix_vente, stock_actuel, stock_min, unite) VALUES
 ('Ordinateur Portable HP 15',  'INFO-001', 1, 'Intel i5, 8Go RAM, 256Go SSD',          250000, 350000, 15,  3,  'pièce'),
 ('Ordinateur Portable Dell',   'INFO-002', 1, 'Intel i7, 16Go RAM, 512Go SSD',         380000, 520000, 8,   2,  'pièce'),
 ('Clé USB 32Go',               'INFO-003', 1, 'USB 3.0 - Haute vitesse',               2500,   5000,   50,  10, 'pièce'),
@@ -125,15 +125,15 @@ INSERT INTO ventes_details (vente_id, produit_id, quantite, prix_unitaire) VALUE
 (7, 19, 2, 10000);
 
 -- ── Mouvements de stock initiaux ──────────────────────────────
-INSERT INTO mouvements_stock (produit_id, type, quantite, stock_avant, stock_apres, motif, user_id) VALUES
-(1,  'entree', 15, 0,  15, 'Stock initial',    1),
-(2,  'entree', 8,  0,  8,  'Stock initial',    1),
-(6,  'entree', 5,  0,  5,  'Stock initial',    1),
-(7,  'entree', 12, 0,  12, 'Stock initial',    1),
-(14, 'entree', 3,  0,  3,  'Stock initial',    1),
-(17, 'entree', 4,  0,  4,  'Stock initial',    1),
-(1,  'sortie', 1,  15, 14, 'Vente FAC-001',    3),
-(7,  'sortie', 1,  12, 11, 'Vente FAC-003',    3);
+INSERT INTO mouvements_stock (produit_id, type_mouvement, quantite, motif, user_id) VALUES
+(1,  'entree', 15, 'Stock initial',    1),
+(2,  'entree', 8,  'Stock initial',    1),
+(6,  'entree', 5,  'Stock initial',    1),
+(7,  'entree', 12, 'Stock initial',    1),
+(14, 'entree', 3,  'Stock initial',    1),
+(17, 'entree', 4,  'Stock initial',    1),
+(1,  'sortie', 1,  'Vente FAC-001',    3),
+(7,  'sortie', 1,  'Vente FAC-003',    3);
 
 -- ── Logs initiaux ─────────────────────────────────────────────
 INSERT INTO logs (user_id, action, details) VALUES

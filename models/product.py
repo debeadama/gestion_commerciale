@@ -1,5 +1,5 @@
 # models/product.py
-"""Modele Produit — gestion des produits, categories et mouvements de stock."""
+"""Modele Produit - gestion des produits, categories et mouvements de stock."""
 
 from database.connection import db
 

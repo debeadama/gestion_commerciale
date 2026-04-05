@@ -11,7 +11,7 @@ Méthodes testées :
   - delete()     : succès, ValueError si produits liés
   - exists()     : True si trouvé, False sinon, avec/sans exclude_id
 
-Architecture : méthodes @staticmethod — db (instance globale de connexion)
+Architecture : méthodes @staticmethod - db (instance globale de connexion)
 est mockée avec @patch.
 
 Pour exécuter :

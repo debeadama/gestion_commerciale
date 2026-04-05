@@ -29,7 +29,7 @@ sys.path.insert(
 
 
 
-# TEST get_all() — filtres search & statut
+# TEST get_all() - filtres search & statut
 
 
 class TestSaleModelGetAll(unittest.TestCase):

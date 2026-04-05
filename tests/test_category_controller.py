@@ -9,7 +9,7 @@ Méthodes testées :
   - update()   : nom vide, doublon, succès, exception
   - delete()   : succès, ValueError produits liés, exception
 
-Architecture : méthodes @staticmethod — CategoryModel et app_cache
+Architecture : méthodes @staticmethod - CategoryModel et app_cache
 sont mockés avec @patch.
 
 Pour exécuter :
@@ -32,7 +32,7 @@ sys.path.insert(
             '..')))
 
 
-# TEST get_all() — cache
+# TEST get_all() - cache
 
 
 class TestCategoryControllerGetAll(unittest.TestCase):
@@ -98,7 +98,7 @@ class TestCategoryControllerCreate(unittest.TestCase):
     def test_nom_espaces_retourne_erreur(self):
         """
         TC-CC-CR-02 : create() avec nom composé d'espaces uniquement
-        doit retourner (False, message) — le strip() doit rejeter ce cas.
+        doit retourner (False, message) - le strip() doit rejeter ce cas.
         """
         ok, msg = CategoryController.create('   ')
 

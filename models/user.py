@@ -1,5 +1,5 @@
 # models/user.py
-"""Modele Utilisateur — CRUD complet pour la gestion des utilisateurs."""
+"""Modele Utilisateur - CRUD complet pour la gestion des utilisateurs."""
 
 import bcrypt
 

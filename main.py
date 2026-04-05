@@ -2,7 +2,7 @@
 """
 Point d'entree principal de l'application SGC.
 
-Systeme de Gestion Commerciale — PyQt6 + MySQL.
+Systeme de Gestion Commerciale - PyQt6 + MySQL.
 """
 
 import logging
@@ -27,7 +27,7 @@ def setup_logging(app_dir: str) -> None:
     level = getattr(logging, level_name, logging.INFO)
 
     formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+        "%(asctime)s [%(levelname)s] %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
@@ -58,11 +58,32 @@ def load_environment() -> str:
         str: Chemin absolu du fichier .env charge.
     """
     if getattr(sys, "frozen", False):
-        application_path = os.path.dirname(sys.executable)
+        # En mode installé : .env dans %APPDATA%\SGC\ (dossier accessible en écriture)
+        appdata = os.environ.get("APPDATA", os.path.dirname(sys.executable))
+        application_path = os.path.join(appdata, "SGC")
     else:
         application_path = os.path.dirname(os.path.abspath(__file__))
 
     env_path = os.path.join(application_path, ".env")
+
+    # Créer le .env avec les valeurs par défaut s'il est absent
+    if not os.path.exists(env_path):
+        os.makedirs(application_path, exist_ok=True)
+        with open(env_path, "w", encoding="utf-8") as f:
+            f.write(
+                "# Connexion base de données\n"
+                "DB_HOST=localhost\n"
+                "DB_PORT=3306\n"
+                "DB_NAME=gestion_commerciale\n"
+                "DB_USER=root\n"
+                "DB_PASSWORD=\n"
+                "\n"
+                "# Application\n"
+                "APP_NAME=Système de Gestion Commerciale\n"
+                "APP_VERSION=1.0.0\n"
+                "SESSION_TIMEOUT=300\n"
+            )
+
     load_dotenv(env_path)
 
     return env_path
@@ -92,7 +113,14 @@ def main() -> None:
     env_path = load_environment()
 
     app_dir = os.path.dirname(env_path)
-    setup_logging(app_dir)
+
+    # En mode installé, les logs vont dans %APPDATA%\SGC\logs
+    # (C:\Program Files est en lecture seule pour les utilisateurs standard)
+    if getattr(sys, "frozen", False):
+        log_dir = os.path.join(os.environ.get("APPDATA", app_dir), "SGC")
+    else:
+        log_dir = app_dir
+    setup_logging(log_dir)
 
     if os.getenv("APP_DEBUG", "False").lower() == "true":
         print_debug_info(env_path)

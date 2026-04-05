@@ -27,7 +27,7 @@ class SessionManager:
     # {username: {'attempts': int, 'blocked_until': float}}
     _login_attempts: dict = {}
 
-    # Permissions par role — 'all' = acces complet (admin)
+    # Permissions par role - 'all' = acces complet (admin)
     PERMISSIONS = {
         'admin': ['all'],
         'manager': [
@@ -106,14 +106,14 @@ class SessionManager:
         if not user:
             cls._record_failed_attempt(username)
             logger.warning(
-                f"Connexion echouee — utilisateur inconnu : {username}"
+                f"Connexion echouee - utilisateur inconnu : {username}"
             )
             return False, "Nom d'utilisateur ou mot de passe incorrect."
 
         if not UserModel.verify_password(password, user['password_hash']):
             cls._record_failed_attempt(username)
             logger.warning(
-                f"Connexion echouee — mauvais mot de passe : {username}"
+                f"Connexion echouee - mauvais mot de passe : {username}"
             )
             return False, "Nom d'utilisateur ou mot de passe incorrect."
 

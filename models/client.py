@@ -1,5 +1,5 @@
 # models/client.py
-"""Modele Client — CRUD complet pour la gestion des clients."""
+"""Modele Client - CRUD complet pour la gestion des clients."""
 
 from database.connection import db
 

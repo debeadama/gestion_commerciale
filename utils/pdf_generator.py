@@ -293,7 +293,7 @@ def generate_invoice_pdf(vente: dict, details: list) -> str:
         W / 2,
         0.45 * cm,
         f"Facture generee le {
-            datetime.now().strftime('%d/%m/%Y a %H:%M')} — {company_name}")
+            datetime.now().strftime('%d/%m/%Y a %H:%M')} - {company_name}")
 
     c.save()
     return filepath

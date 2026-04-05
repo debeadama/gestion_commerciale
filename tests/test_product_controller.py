@@ -31,10 +31,12 @@ sys.path.insert(
 
 class TestProductControllerGetAll(unittest.TestCase):
 
+    @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.get_all',
            return_value=[{'id': 1, 'nom': 'Câble USB'}])
-    def test_get_all_sans_filtre(self, mock_get):
+    def test_get_all_sans_filtre(self, mock_get, mock_cache):
         """TC-PGA-01 : get_all() sans filtre retourne la liste du modèle."""
+        mock_cache.get.return_value = None
         result = ProductController.get_all()
         self.assertEqual(len(result), 1)
         mock_get.assert_called_once_with(None, None)
@@ -78,7 +80,7 @@ class TestProductControllerGetById(unittest.TestCase):
 
 
 
-# TEST get_categories() — cache hit / miss
+# TEST get_categories() - cache hit / miss
 
 
 class TestProductControllerGetCategories(unittest.TestCase):
@@ -114,7 +116,7 @@ class TestProductControllerGetCategories(unittest.TestCase):
 
 
 
-# TEST get_low_stock() — cache hit / miss
+# TEST get_low_stock() - cache hit / miss
 
 
 class TestProductControllerGetLowStock(unittest.TestCase):
@@ -195,7 +197,7 @@ class TestProductControllerCreate(unittest.TestCase):
             {'nom': 'Samsung A55', 'prix_vente': 185000})
         self.assertTrue(ok)
         self.assertEqual(pid, 5)
-        mock_cache.invalidate.assert_called_once()
+        self.assertEqual(mock_cache.invalidate.call_count, 2)
 
     @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.create',
@@ -228,7 +230,7 @@ class TestProductControllerUpdate(unittest.TestCase):
             1, {'nom': 'HP Laptop Pro', 'prix_vente': 400000})
         self.assertTrue(ok)
         mock_update.assert_called_once()
-        mock_cache.invalidate.assert_called_once()
+        self.assertEqual(mock_cache.invalidate.call_count, 2)
 
     @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.update',
@@ -255,7 +257,7 @@ class TestProductControllerDelete(unittest.TestCase):
         ok, msg = ProductController.delete(1)
         self.assertTrue(ok)
         mock_delete.assert_called_once_with(1)
-        mock_cache.invalidate.assert_called_once()
+        self.assertEqual(mock_cache.invalidate.call_count, 2)
 
     @patch('controllers.product_controller.app_cache')
     @patch('controllers.product_controller.ProductModel.delete',
@@ -355,7 +357,7 @@ class TestProductControllerStockMovement(unittest.TestCase):
             self, mock_get, mock_apply, mock_cache):
         """TC-SM-08 : cache invalidé après mouvement réussi."""
         ProductController.add_stock_movement(1, 'entree', 5)
-        mock_cache.invalidate.assert_called_once()
+        self.assertEqual(mock_cache.invalidate.call_count, 2)
 
 
 

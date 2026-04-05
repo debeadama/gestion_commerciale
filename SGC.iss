@@ -25,6 +25,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
 PrivilegesRequired=admin
+UsedUserAreasWarning=no
 OutputDir=C:\gestion_commerciale
 OutputBaseFilename=SGC_setup
 SetupIconFile=C:\gestion_commerciale\sgc_logo.ico
@@ -38,6 +39,10 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+[Dirs]
+; Crée le dossier utilisateur pour le .env et les logs (accessible en écriture)
+Name: "{userappdata}\SGC"
+
 [Files]
 Source: "C:\gestion_commerciale\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; Fichier batch installation base de données
@@ -46,6 +51,8 @@ Source: "C:\gestion_commerciale\install_db.bat"; DestDir: "{app}"; Flags: ignore
 Source: "C:\gestion_commerciale\database\schema.sql"; DestDir: "{app}\database"; Flags: ignoreversion
 Source: "C:\gestion_commerciale\database\add_indexes.sql"; DestDir: "{app}\database"; Flags: ignoreversion
 Source: "C:\gestion_commerciale\database\seed_data.sql"; DestDir: "{app}\database"; Flags: ignoreversion
+; Fichier de configuration — copié dans %APPDATA%\SGC\ seulement si absent
+Source: "C:\gestion_commerciale\.env.default"; DestDir: "{userappdata}\SGC"; DestName: ".env"; Flags: onlyifdoesntexist uninsneveruninstall
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue

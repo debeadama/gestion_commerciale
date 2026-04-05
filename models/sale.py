@@ -1,5 +1,5 @@
 # models/sale.py
-"""Modele Vente — CRUD complet pour la gestion des ventes."""
+"""Modele Vente - CRUD complet pour la gestion des ventes."""
 
 from datetime import datetime
 

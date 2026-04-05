@@ -42,7 +42,7 @@ def _confirm(parent, title, message):
 
 
 class SettingsView(QWidget):
-    """Module Paramètres — admin uniquement."""
+    """Module Paramètres - admin uniquement."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
